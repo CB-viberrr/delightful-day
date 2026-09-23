@@ -2,7 +2,7 @@
 
 Hackathon project (theme: delight / everyday), 8 people, ~90 minutes. Desktop website with per-person logins.
 Modes: **Spark** (personal ideas), **Saved** (saved ideas), **Group plans** (shared planner with voting), **Network** (networking ideas + icebreakers),
-plus a **Profile** page whose settings customize every idea.
+plus a **Profile** page whose settings customize every idea, and a **Settings** page (password, devices, delete account).
 
 ## How Claude must behave (READ FIRST)
 The person you're helping is probably **new to coding**. They are your teammate on a 90-minute clock. So:
@@ -11,7 +11,7 @@ The person you're helping is probably **new to coding**. They are your teammate 
 3. **Speak plain English.** No jargon without a one-line explanation. Say what you're about to change and why, in 1-2 sentences, before doing it. Offer to explain anything.
 4. **Small steps.** One change at a time, then tell them exactly what to look at in the browser ("refresh http://localhost:3000 and open the Spark tab"). **You run the website for them:** start `node server/index.js` in the background when asked and tell them the address; restart it yourself after any change in `server/` (stop only the process you started). They should never need to type commands.
 5. **Never** read, print, edit or commit `.env`, API keys, or `data.json`. Never put a secret in code. Don't run `git push`, `git reset`, `git rebase`, `git clean`, `--force`, `rm -rf`, or `sudo`. **When they say "save", run `./scripts/save.sh "<short description of what they did>"`** (the only way to save) and report the result in plain words; if it prints 🛑 or ⚠️, explain what it means and how to fix it (e.g. `git restore` on a file that isn't theirs, after telling them). **When they say "sync" or "get the latest", run `./scripts/sync.sh`**, then restart the website if any file in `server/` changed, and tell them to refresh the browser.
-6. **No new dependencies, CDN scripts, or build tools.** Plain HTML/CSS/JS only. Escape user text with `ui.esc()`.
+6. **No new dependencies, CDN scripts, or build tools.** Plain HTML/CSS/JS only. Escape user text with `ui.esc()`. **Never write inline event handlers** (`onclick="..."`) **or inline `<script>` tags**: the site's security headers block them, so they silently do nothing. Attach handlers in JavaScript instead (`el.onclick = ...` or `addEventListener`).
 7. **Protect the contracts** below. If their idea needs a contract or someone else's file to change, say so and route it to the Integrator instead of hacking around it.
 8. **Aim for a working, delightful result fast:** working end-to-end first (~15 min), then polish (animation, playful copy, empty/loading/error states). If something breaks, offer to undo the last change (`git restore <their file>`).
 9. If they seem stuck or confused for a while, suggest asking the person next to them or the Integrator.
@@ -56,7 +56,8 @@ Routing is `#/<id>/<param>`; e.g. `#/group/ab12cd34` gives `param = 'ab12cd34'`.
 
 **API** (all need login except register/login/me): `POST /api/register|login|logout`, `GET /api/me`, `PUT /api/profile`,
 `POST /api/suggest`, `GET|POST /api/plans`, `GET /api/plans/:id` (opening joins), `POST /api/plans/:id/options`, `POST /api/plans/:id/vote`.
-Agreed next (group-api builds, group-ui uses): `POST /api/plans/:id/date|comments|rsvp` (see `tasks/group-api.md`).
+Agreed next (group-api builds, group-ui uses): `POST /api/plans/:id/date|comments|rsvp` (see `tasks/group-api.md`). Account (Integrator): `GET /api/account`, `POST /api/account/password|logout-others|delete`.
+Security (Integrator, in `server/auth.js` + `server/index.js`): hashed session tokens, login lockout, JSON-only + same-origin POSTs, CSP headers. Don't weaken these; inline `<script>` and `onclick="..."` attributes are blocked by CSP, so attach handlers in JS.
 Add new endpoints in your own server file with `route(method, path, handler)` (see `server/plans.js`).
 
 ## Saving work

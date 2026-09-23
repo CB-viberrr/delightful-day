@@ -30,15 +30,30 @@ const locked = fn => { const p = chain.then(fn, fn); chain = p.catch(() => {}); 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.json': 'application/json' };
 const PUBLIC = path.join(__dirname, '..', 'public');
 
+const MAX_BODY = 100000; // bytes
 async function readBody(req) {
   if (req.method === 'GET') return {};
+  // Only accept JSON, and only from our own site: stops other websites from posting forms as a logged-in user (CSRF).
+  if (!/^application\/json\b/i.test(req.headers['content-type'] || '')) throw new HttpError(415, 'Send JSON');
+  const origin = req.headers.origin;
+  let host = null; try { host = origin && new URL(origin).host; } catch {}
+  if (origin && host !== req.headers.host) throw new HttpError(403, 'Cross-site request blocked');
+  if (+req.headers['content-length'] > MAX_BODY) throw new HttpError(413, 'Request too large');
   if (req.body && typeof req.body === 'object') return req.body; // Vercel pre-parses JSON
-  let s = ''; for await (const c of req) s += c;
+  let s = ''; for await (const c of req) { s += c; if (s.length > MAX_BODY) throw new HttpError(413, 'Request too large'); }
   try { return s ? JSON.parse(s) : {}; } catch { throw new HttpError(400, 'Bad JSON'); }
 }
 
+// Browser safety headers (the live site sets the same ones in vercel.json for static files).
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'same-origin',
+  'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
+};
+
 async function handler(req, res) {
   const url = new URL(req.url, 'http://x');
+  for (const [k, v] of Object.entries(SECURITY_HEADERS)) res.setHeader(k, v);
+  if (url.pathname.startsWith('/api/')) res.setHeader('Cache-Control', 'no-store');
   try {
     if (url.pathname.startsWith('/api/')) {
       const r = routes.find(r => r.method === req.method && r.re.test(url.pathname));
@@ -54,7 +69,8 @@ async function handler(req, res) {
       let out;
       if (!PG) out = await exec();
       else if (r.slow) { await locked(load); out = await exec(); }
-      else out = await locked(async () => { await load(); const o = await exec(); await flush(); return o; });
+      // flush even when the handler throws (e.g. a failed login must still save its lockout counter)
+      else out = await locked(async () => { await load(); try { return await exec(); } finally { await flush(); } });
       res.writeHead(200, { 'content-type': 'application/json', ...res.getHeaders() });
       return res.end(JSON.stringify(out ?? { ok: true }));
     }

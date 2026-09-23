@@ -39,8 +39,11 @@ const FALLBACK = {
   ],
 };
 const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
-const fallback = (mode, n = 5) => shuffle(FALLBACK[mode] || FALLBACK.solo).slice(0, n).map(([emoji, title, description, tags, cost, duration]) =>
+const fallback = (mode, n = 5, avoid = []) => {
+  const all = FALLBACK[mode] || FALLBACK.solo, fresh = all.filter(i => !avoid.includes(i[1]));
+  return shuffle(fresh.length ? fresh : all).slice(0, n).map(([emoji, title, description, tags, cost, duration]) =>
   ({ emoji, title, description, tags, cost, duration, vibe: tags[0], mode }));
+};
 
 async function askClaude(mode, profile, context, n) {
   const key = process.env.ANTHROPIC_API_KEY; if (!key) return null;
@@ -49,6 +52,7 @@ Suggest ${n} ${GUIDE[mode] || GUIDE.solo}.
 User profile (JSON, fields may be empty): ${JSON.stringify(profile || {})}
 Extra context (JSON): ${JSON.stringify(context || {})}
 Respect their budget, energy, mood, vibe, time available, and interests. Be specific, fresh and delightful, never generic.
+If context.avoid lists titles, do NOT suggest those or anything very similar.
 Reply with ONLY a JSON array, no prose. Each item: {"title": string, "emoji": one emoji, "description": 1-2 sentences, "tags": [2-3 short strings], "cost": "free"|"$"|"$$"|"$$$", "duration": string like "1h", "vibe": one word}`;
   const r = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST', signal: AbortSignal.timeout(25000),
@@ -69,6 +73,7 @@ module.exports = ({ route, HttpError }) => {
     const mode = FALLBACK[body.mode] ? body.mode : 'solo', n = Math.min(body.count || 5, 8);
     try { const ideas = await askClaude(mode, body.profile, body.context, n); if (ideas && ideas.length) return { ideas, source: 'claude' }; }
     catch (e) { console.error('suggest fallback:', e.message); }
-    return { ideas: fallback(mode, n), source: 'fallback' };
+    const avoid = Array.isArray(body.context && body.context.avoid) ? body.context.avoid : [];
+    return { ideas: fallback(mode, n, avoid), source: 'fallback' };
   }, { slow: true });
 };

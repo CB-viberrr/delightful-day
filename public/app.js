@@ -6,7 +6,7 @@ function authScreen() {
   topbar.hidden = true;
   view.innerHTML = `<div class="auth card"><h1>🌙 Tonight</h1><p class="sub">Never wonder "what should we do?" again.</p>
     <form id="f"><input name="username" placeholder="Username" autocomplete="username" required>
-    <input name="password" type="password" placeholder="Password" autocomplete="current-password" required>
+    <input name="password" type="password" placeholder="Password (8+ characters for new accounts)" autocomplete="current-password" required>
     <div class="err" id="err"></div>
     <button class="btn" data-mode="login">Log in</button>
     <button class="btn ghost" data-mode="register">Create account</button></form></div>`;
