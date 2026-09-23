@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tonight</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="top" hidden>
+  <a class="brand" href="#/solo">🌙 Tonight</a>
+  <nav id="nav"></nav>
+  <div id="who"></div>
+</header>
+<main id="view"></main>
+<div id="toast" hidden></div>
+
+<script src="core.js"></script>
+<!-- Feature modules: one file per squad. Order = tab order. Only edit your own file. -->
+<script src="features/solo.js"></script>
+<script src="features/group.js"></script>
+<script src="features/network.js"></script>
+<script src="features/profile.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

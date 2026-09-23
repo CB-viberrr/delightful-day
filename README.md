@@ -1,5 +1,7 @@
-# ☀️ A Delightful Day
-A web microgame collection built at a Claude hackathon. Open `index.html` to play.
+# 🌙 Tonight
+"What should we do tonight?" for solo nights, group plans and networking. Built at a Claude hackathon.
 
-**Teammates:** clone, then run `claude` in the folder and paste the prompt from `TEAMMATE_PROMPT.md`.
-Each person owns one file in `levels/`. Rules and the level contract are in `CLAUDE.md`.
+```
+node server/index.js   # http://localhost:3000, no install needed
+```
+Teammates: see `TEAMMATE_PROMPT.md`. Architecture, ownership and contracts: `CLAUDE.md`.

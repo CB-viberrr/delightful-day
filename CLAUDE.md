@@ -1,42 +1,54 @@
-# A Delightful Day: microgame collection
+# Tonight: "what should we do tonight?" web app
 
-Web game for a 90-minute hackathon (theme: delight / everyday). The player runs through a day of
-tiny 5-15 second mini-games ("levels"), 3 lives, each round slightly faster.
+Hackathon project (theme: delight / everyday), 8 people, ~90 minutes. Desktop website with per-person logins.
+Three modes: **Spark** (personal ideas), **Group plans** (shared planner with voting), **Network** (networking ideas + icebreakers),
+plus a **Profile** page whose settings customize every idea.
+
+## Run it
+```
+node server/index.js        # or: npm start   -> http://localhost:3000
+```
+Node 18+, **no npm install, zero dependencies**. Optional: copy `.env.example` to `.env` and add `ANTHROPIC_API_KEY`
+for real Claude ideas. Without a key, `/api/suggest` serves built-in fallback ideas so everything still works.
 
 ## Rules
-- Plain HTML/CSS/JS. **No build step, no npm, no frameworks, no external files.** Must work by opening `index.html`.
-- **Each teammate owns exactly one file: `levels/level-0N.js`. Only edit your own file.**
-  Do not touch `engine.js`, `main.js`, `index.html`, `style.css` (ask the engine owner instead).
-- Put your level's CSS inline via `element.style` / `style.cssText` (or inject a `<style>` in `start`) so files never conflict.
-- Emoji are great as free graphics. Keep it colorful, juicy, and funny. Delight > complexity.
-- One mechanic, one verb, winnable in under 10 seconds. Playable with mouse/touch OR arrow keys.
+- Plain HTML/CSS/JS on the front end. No build step, no frameworks, no CDN files.
+- **One owner per file. Only edit your own files** (table below). Ask the owner for changes elsewhere.
+- Keep your UI inside the container your `render()` receives. Prefix any new CSS classes with your feature name
+  (e.g. `.solo-deck`) and put them in your feature file via an injected `<style>` so `style.css` never conflicts.
+- Use shared helpers: `api()`, `app.suggest()`, `ui.ideaCard()`, `ui.toast()`, `ui.esc()` (always escape user text).
+- Delight matters: animations, emoji, good empty states, playful copy. Keep it working first, then polish.
 
-## Level contract
+## File ownership
+| File | Owner |
+|---|---|
+| `public/core.js`, `public/app.js`, `public/index.html`, `server/index.js`, `server/auth.js`, `server/db.js` | Integrator |
+| `server/suggest.js` (Claude prompt + fallback ideas) | Integrator (prompt tweaks: Solo/Network people ask first) |
+| `public/features/profile.js`, `server/profile.js` | Profile |
+| `public/features/solo.js` | Solo squad (2) |
+| `public/features/group.js`, `server/plans.js` | Group squad (2) |
+| `public/features/network.js` | Networking |
+| `public/style.css` | Design |
+
+## Contracts
+**Feature** (`public/features/*.js`):
 ```js
-registerLevel({
-  id: 'unique-id',
-  title: '☕ Brew Coffee',          // shown before the level
-  instructions: 'Hold to pour, release at the line!',  // short imperative
-  duration: 8,                     // seconds; timer shown by engine
-  survive: false,                  // true = surviving until time runs out is a WIN (dodge games)
-  start(container, { win, lose, speed }) {
-    // build your game inside `container` (position:absolute children work; it's ~900x560 and overflow hidden)
-    // call win() or lose() exactly once. `speed` >= 1 gets bigger each round; use it to scale difficulty.
-    // Timeout: engine calls lose() (or win() if survive:true) for you.
-    return () => { /* optional cleanup: clearInterval, removeEventListener on document/window */ };
-  },
-});
+registerFeature({ id, label, icon, render(container, { param }) { /* build UI in container; may return cleanup fn */ } });
 ```
-Helpers: `fx.shake(el)`, `fx.pop(el)`, `fx.confetti(container)`. See `levels/level-01.js` for a working example.
+Routing is `#/<id>/<param>`; e.g. `#/group/ab12cd34` gives `param = 'ab12cd34'`.
 
-## Testing your level alone
-Open `index.html?level=N` (N = your level number) to play only your level.
-Serve locally with `python3 -m http.server 8000` then visit http://localhost:8000/?level=N, or just open the file.
+**Profile** (`app.profile`, saved per user via `app.saveProfile(p)`):
+`{ mood, energy(1-5), budget('free'|'$'|'$$'|'$$$'), vibes[], groupSize, time, interests[], goal, city, notes }`
+
+**Idea** (returned by `app.suggest`, rendered by `ui.ideaCard`):
+`{ title, emoji, description, tags[], cost, duration, vibe, mode }`
+
+**Suggest**: `app.suggest(mode, context, count)`, mode = `'solo' | 'group' | 'network' | 'icebreakers'`. Resolves `{ ideas, source: 'claude'|'fallback' }`.
+
+**API** (all need login except register/login/me): `POST /api/register|login|logout`, `GET /api/me`, `PUT /api/profile`,
+`POST /api/suggest`, `GET|POST /api/plans`, `GET /api/plans/:id` (opening joins), `POST /api/plans/:id/options`, `POST /api/plans/:id/vote`.
+Add new endpoints in your own server file with `route(method, path, handler)` (see `server/plans.js`); register a new server file with one line in `server/index.js` (ask the integrator).
 
 ## Git workflow
-- `git pull --rebase` before every push. Commit + push small and often (every ~10-15 min).
-- Only your own level file changes, so conflicts should not happen. If one does, keep both sides and ask.
-
-## Level ideas (slots)
-1 Wake Up (smash snooze, done) · 2 Brew Coffee (timing) · 3 Perfect Toast (timing) · 4 Commute (dodge)
-5 Inbox Zero (click fast) · 6 Water the Plants (drag) · 7 Wrangle the Cat (mouse follow) · 8 Bedtime Stars (click sequence)
+`git pull --rebase` before every push. Commit and push small and often (~10-15 min). Since files are owned individually, conflicts should not happen.
+If one does, keep both sides and ask the owner.
