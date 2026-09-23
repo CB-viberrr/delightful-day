@@ -6,6 +6,9 @@ echo "Checking your tools..."
 command -v node >/dev/null && ok "Node $(node -v)" || no "Node.js missing: install from https://nodejs.org (LTS), then re-run"
 command -v git  >/dev/null && ok "git" || no "git missing: install from https://git-scm.com, then re-run"
 command -v claude >/dev/null && ok "Claude Code" || echo "  ⚠️  'claude' not found in this terminal (fine if you use the Claude desktop app)"
+if command -v gh >/dev/null; then
+  gh auth status >/dev/null 2>&1 && ok "GitHub login" || echo "  ⚠️  Not logged in to GitHub yet. Run: gh auth login   (needed to save your work)"
+else echo "  ⚠️  GitHub CLI missing: install from https://cli.github.com, then run: gh auth login"; fi
 [ -n "$MISSING" ] && exit 1
 git config pull.rebase true
 ROLE="$1"

@@ -3,22 +3,28 @@
 You will build one piece of a real website with Claude doing the typing. Your job: **decide what it should look like and do, check it works, and save it.** You cannot break the team's work if you follow this page. The tools stop you from touching things that aren't yours.
 
 ## Part 1: Set up (10 minutes, once)
-1. **Get invited:** accept the GitHub email invite from the Integrator (Charles).
-2. **Open a terminal** (Mac: press ⌘+Space, type `Terminal`, Enter).
-3. **Download the project** (copy each line, press Enter):
+1. **Get invited:** send Charles your GitHub username, then accept the GitHub email invite.
+2. **Open a terminal** (Mac: press ⌘+Space, type `Terminal`, Enter). Windows users: tell Charles first, the scripts need one extra tool.
+3. **Install three things** (one time):
+   - **Node.js**: download the "LTS" installer from https://nodejs.org and run it.
+   - **GitHub CLI**: follow https://cli.github.com (the Mac installer is the easiest).
+   - **Claude Code**: paste this into Terminal and press Enter: `curl -fsSL https://claude.ai/install.sh | bash`
+   Then **close and reopen Terminal**.
+4. **Log in to GitHub** (so you can save your work): run `gh auth login`, choose GitHub.com, then HTTPS, then Yes (authenticate git), then "Login with a web browser", and follow the steps.
+5. **Download the project** (copy each line, press Enter):
    ```
-   git clone https://github.com/CB-viberrr/delightful-day
+   gh repo clone CB-viberrr/delightful-day
    cd delightful-day
    ./scripts/setup.sh
    ```
    `setup.sh` checks your tools and asks for your **role**. Type it exactly (your role is on the sheet the Integrator gave you). If it says Node or git is missing, install it from the link it prints, then run `./scripts/setup.sh` again.
-4. **Start the website** (leave this terminal open):
+6. **Start the website** (leave this terminal open):
    ```
    node server/index.js
    ```
    Open http://localhost:3000 in your browser and **create an account**. That's your own private copy of the site.
-5. **Open a second terminal**, `cd delightful-day`, and start Claude Code: type `claude` (or open the folder in the Claude desktop app).
-6. **Paste this to Claude** (it reads the rules for you):
+7. **Open a second terminal tab** (⌘+T), type `cd delightful-day`, then `claude`. Sign in with your Claude account when it asks, and say yes to trusting the folder.
+8. **Paste this to Claude** (it reads the rules for you):
    ```
    I'm new to coding. Read CLAUDE.md and tasks/<my role>.md (my role is in the file .role). Explain in plain language what my piece of the app does, then start on my first task.
    ```
