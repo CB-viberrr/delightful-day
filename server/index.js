@@ -1,23 +1,43 @@
-// Server core (integrator owns). Zero dependencies. Feature routes live in the other server/*.js files.
+// Server core (integrator owns). Runs locally (node server/index.js) AND on Vercel (api/[...path].js exports `handler`).
+// Feature routes live in the other server/*.js files.
 const http = require('http'), fs = require('fs'), path = require('path');
 try { for (const l of fs.readFileSync(path.join(__dirname, '..', '.env'), 'utf8').split('\n')) {
   const m = l.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2]; } } catch {}
 
+const { load, flush, PG } = require('./db');
 const routes = [];
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
-// route('POST', '/api/plans/:id/join', async ({ params, body, user, req, res }) => returnJson)
-function route(method, pattern, handler, { auth = true } = {}) {
+// route('POST', '/api/plans/:id/join', async ({ params, body, user, req, res }) => returnJson, { auth: true, slow: false })
+// slow:true = handler makes long outside calls (like Claude) and must NOT change db data.
+function route(method, pattern, handler, { auth = true, slow = false } = {}) {
   const keys = [];
   const re = new RegExp('^' + pattern.replace(/:(\w+)/g, (_, k) => (keys.push(k), '([^/]+)')) + '$');
-  routes.push({ method, re, keys, handler, auth });
+  routes.push({ method, re, keys, handler, auth, slow });
 }
 const app = { route, HttpError };
-require('./auth')(app); require('./profile')(app); require('./suggest')(app); require('./plans')(app);
+// One broken feature file must never take the whole site down: skip it and keep going.
+const MODULES = { auth: () => require('./auth'), profile: () => require('./profile'), suggest: () => require('./suggest'), plans: () => require('./plans') };
+for (const [name, get] of Object.entries(MODULES)) {
+  try { get()(app); } catch (e) { console.error(`⚠️ server/${name}.js failed to load and was skipped:`, e.message); }
+}
+let userFrom = () => null;
+try { userFrom = require('./auth').userFrom; } catch {}
+
+// On the live site each request does load -> handle -> flush against the shared database, one at a time (so no lost updates).
+let chain = Promise.resolve();
+const locked = fn => { const p = chain.then(fn, fn); chain = p.catch(() => {}); return p; };
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.json': 'application/json' };
 const PUBLIC = path.join(__dirname, '..', 'public');
 
-http.createServer(async (req, res) => {
+async function readBody(req) {
+  if (req.method === 'GET') return {};
+  if (req.body && typeof req.body === 'object') return req.body; // Vercel pre-parses JSON
+  let s = ''; for await (const c of req) s += c;
+  try { return s ? JSON.parse(s) : {}; } catch { throw new HttpError(400, 'Bad JSON'); }
+}
+
+async function handler(req, res) {
   const url = new URL(req.url, 'http://x');
   try {
     if (url.pathname.startsWith('/api/')) {
@@ -25,12 +45,17 @@ http.createServer(async (req, res) => {
       if (!r) throw new HttpError(404, 'Not found');
       const m = url.pathname.match(r.re);
       const params = Object.fromEntries(r.keys.map((k, i) => [k, decodeURIComponent(m[i + 1])]));
-      let body = {};
-      if (req.method !== 'GET') { let s = ''; for await (const c of req) s += c; try { body = s ? JSON.parse(s) : {}; } catch { throw new HttpError(400, 'Bad JSON'); } }
-      const user = require('./auth').userFrom(req);
-      if (r.auth && !user) throw new HttpError(401, 'Please log in');
-      const out = await r.handler({ params, body, user, req, res, query: url.searchParams });
-      res.writeHead(200, { 'content-type': 'application/json', ...(res.getHeaders()) });
+      const body = await readBody(req);
+      const exec = async () => {
+        const user = userFrom(req);
+        if (r.auth && !user) throw new HttpError(401, 'Please log in');
+        return r.handler({ params, body, user, req, res, query: url.searchParams });
+      };
+      let out;
+      if (!PG) out = await exec();
+      else if (r.slow) { await locked(load); out = await exec(); }
+      else out = await locked(async () => { await load(); const o = await exec(); await flush(); return o; });
+      res.writeHead(200, { 'content-type': 'application/json', ...res.getHeaders() });
       return res.end(JSON.stringify(out ?? { ok: true }));
     }
     let file = path.join(PUBLIC, path.normalize(url.pathname === '/' ? '/index.html' : url.pathname));
@@ -40,6 +65,12 @@ http.createServer(async (req, res) => {
   } catch (e) {
     const status = e.status || 500; if (status === 500) console.error(e);
     res.writeHead(status, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({ error: e.message }));
+    res.end(JSON.stringify({ error: status === 500 ? 'Something went wrong on the server' : e.message }));
   }
-}).listen(process.env.PORT || 3000, () => console.log('Tonight running on http://localhost:' + (process.env.PORT || 3000)));
+}
+
+module.exports = { handler };
+if (require.main === module) {
+  const port = process.env.PORT || 3000;
+  http.createServer(handler).listen(port, () => console.log('Tonight running on http://localhost:' + port));
+}

@@ -61,11 +61,14 @@ Reply with ONLY a JSON array, no prose. Each item: {"title": string, "emoji": on
   return arr.map(i => ({ ...i, mode, tags: i.tags || [] }));
 }
 
-module.exports = ({ route }) => {
-  route('POST', '/api/suggest', async ({ body }) => {
+const hits = {}; // per-user rate limit (in memory): 40 requests per 10 minutes
+module.exports = ({ route, HttpError }) => {
+  route("POST", "/api/suggest", async ({ body, user }) => {
+    const now = Date.now(), h = (hits[user.username] = (hits[user.username] || []).filter(t => now - t < 600000));
+    if (h.length >= 40) throw new HttpError(429, "Slow down a little, try again in a few minutes"); h.push(now);
     const mode = FALLBACK[body.mode] ? body.mode : 'solo', n = Math.min(body.count || 5, 8);
     try { const ideas = await askClaude(mode, body.profile, body.context, n); if (ideas && ideas.length) return { ideas, source: 'claude' }; }
     catch (e) { console.error('suggest fallback:', e.message); }
     return { ideas: fallback(mode, n), source: 'fallback' };
-  });
+  }, { slow: true });
 };

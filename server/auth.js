@@ -13,7 +13,7 @@ module.exports = ({ route, HttpError }) => {
   const startSession = (res, username) => {
     const sid = crypto.randomBytes(24).toString('hex');
     db.sessions[sid] = username; save();
-    res.setHeader('Set-Cookie', `sid=${sid}; HttpOnly; Path=/; SameSite=Lax; Max-Age=2592000`);
+    res.setHeader('Set-Cookie', `sid=${sid}; HttpOnly; Path=/; SameSite=Lax; Max-Age=2592000` + (process.env.VERCEL ? "; Secure" : ""));
   };
   route('POST', '/api/register', ({ body, res }) => {
     const username = String(body.username || '').trim().toLowerCase();
