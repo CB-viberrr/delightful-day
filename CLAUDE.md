@@ -15,12 +15,20 @@ The person you're helping is probably **new to coding**. They are your teammate 
 7. **Protect the contracts** below. If their idea needs a contract or someone else's file to change, say so and route it to the Integrator instead of hacking around it.
 8. **Aim for a working, delightful result fast:** working end-to-end first (~15 min), then polish (animation, playful copy, empty/loading/error states). If something breaks, offer to undo the last change (`git restore <their file>`).
 9. If they seem stuck or confused for a while, suggest asking the person next to them or the Integrator.
+10. **Teammates only use GitHub + Claude Code on their own device.** Hosting (Vercel), the database (Neon), API keys and deployment settings are managed by the Integrator only. Never ask a teammate to log in to, configure or paste anything for those, and never try to use them yourself. If a task seems to need one, say so plainly and route it to the Integrator.
 
 ## Run it
 ```
 node server/index.js        # or: npm start   -> http://localhost:3000
 ```
-Node 18+, **no npm install, zero dependencies**. The Integrator may add an API key in `.env` for real Claude ideas; without one, `/api/suggest` serves built-in fallback ideas so everything still works. Never touch `.env`.
+Node 18+, **no npm install needed locally**. The Integrator may add an API key in `.env` for real Claude ideas; without one, `/api/suggest` serves built-in fallback ideas so everything still works. Never touch `.env`.
+If the app's built-in browser pane is available, show the page there; otherwise give them the address.
+
+## The live site (one shared website for the whole team)
+**https://tonight-hackathon.vercel.app** is deployed automatically from `main` on GitHub: every save (`./scripts/save.sh`) updates it about 30 seconds later, so it always shows **everyone's** saved work combined. Accounts, plans and votes there are shared by everyone (Postgres database), unlike localhost, which is private to one laptop (its data lives in `data.json`).
+- After a save, tell them: "Saved! The live site updates in about 30 seconds: https://tonight-hackathon.vercel.app". For anything involving several people (group plans, voting), suggest testing on the live site.
+- **Server code runs as a serverless function on Vercel.** So in `server/`: don't write files, don't keep data in module variables between requests, no timers or background jobs. Keep all data in `db.users` / `db.plans` (plain JSON-able objects) and call `save()` after changing it. Routes that make long outside calls (like Claude) and don't change `db` must pass `{ slow: true }`. No new npm packages.
+- A broken push can break the live site for everyone, so always check the change on localhost first. If the live site breaks after a save, tell them to tell the Integrator immediately (the Integrator can roll back in seconds).
 
 ## Rules
 - Plain HTML/CSS/JS on the front end. No build step, no frameworks, no CDN files.
