@@ -1,34 +1,33 @@
 # Tonight: "what should we do tonight?" web app
 
 Hackathon project (theme: delight / everyday), 8 people, ~90 minutes. Desktop website with per-person logins.
-Three modes: **Spark** (personal ideas), **Group plans** (shared planner with voting), **Network** (networking ideas + icebreakers),
+Modes: **Spark** (personal ideas), **Saved** (saved ideas), **Group plans** (shared planner with voting), **Network** (networking ideas + icebreakers),
 plus a **Profile** page whose settings customize every idea.
+
+## How Claude must behave (READ FIRST)
+The person you're helping is probably **new to coding**. They are your teammate on a 90-minute clock. So:
+1. **Find their role:** read the file `.role` (e.g. `spark`), then read `tasks/<role>.md` and `ownership.json`. If `.role` is missing, tell them to run `./scripts/setup.sh` in the terminal and stop.
+2. **Edit only files their role owns** (`ownership.json`). A hook enforces this; if you see `BLOCKED`, do not look for a workaround. Explain in one plain sentence whose file it is and suggest they ask that person or the Integrator.
+3. **Speak plain English.** No jargon without a one-line explanation. Say what you're about to change and why, in 1-2 sentences, before doing it. Offer to explain anything.
+4. **Small steps.** One change at a time, then tell them exactly what to look at in the browser ("refresh http://localhost:3000 and open the Spark tab"). Say when the server needs a restart (only for `server/` changes).
+5. **Never** read, print, edit or commit `.env`, API keys, or `data.json`. Never put a secret in code. Don't run `git push`, `git reset`, `git rebase`, `git clean`, `--force`, `rm -rf`, or `sudo`. To save their work, tell them to run `./scripts/save.sh "what I did"` themselves (or run exactly that script if they ask you to).
+6. **No new dependencies, CDN scripts, or build tools.** Plain HTML/CSS/JS only. Escape user text with `ui.esc()`.
+7. **Protect the contracts** below. If their idea needs a contract or someone else's file to change, say so and route it to the Integrator instead of hacking around it.
+8. **Aim for a working, delightful result fast:** working end-to-end first (~15 min), then polish (animation, playful copy, empty/loading/error states). If something breaks, offer to undo the last change (`git restore <their file>`).
+9. If they seem stuck or confused for a while, suggest asking the person next to them or the Integrator.
 
 ## Run it
 ```
 node server/index.js        # or: npm start   -> http://localhost:3000
 ```
-Node 18+, **no npm install, zero dependencies**. Optional: copy `.env.example` to `.env` and add `ANTHROPIC_API_KEY`
-for real Claude ideas. Without a key, `/api/suggest` serves built-in fallback ideas so everything still works.
+Node 18+, **no npm install, zero dependencies**. The Integrator may add an API key in `.env` for real Claude ideas; without one, `/api/suggest` serves built-in fallback ideas so everything still works. Never touch `.env`.
 
 ## Rules
 - Plain HTML/CSS/JS on the front end. No build step, no frameworks, no CDN files.
-- **One owner per file. Only edit your own files** (table below). Ask the owner for changes elsewhere.
-- Keep your UI inside the container your `render()` receives. Prefix any new CSS classes with your feature name
-  (e.g. `.solo-deck`) and put them in your feature file via an injected `<style>` so `style.css` never conflicts.
+- **One owner per file.** Ownership lives in `ownership.json` (roles: integrator, profile, spark, saved, group-ui, group-api, network, design). Governance and safety rules: `GOVERNANCE.md`. Beginner guide: `START_HERE.md`.
+- Keep your UI inside the container your `render()` receives. Prefix any new CSS classes with your feature name (e.g. `.solo-deck`) and put them in your feature file via an injected `<style>` so `style.css` never conflicts.
 - Use shared helpers: `api()`, `app.suggest()`, `ui.ideaCard()`, `ui.toast()`, `ui.esc()` (always escape user text).
 - Delight matters: animations, emoji, good empty states, playful copy. Keep it working first, then polish.
-
-## File ownership
-| File | Owner |
-|---|---|
-| `public/core.js`, `public/app.js`, `public/index.html`, `server/index.js`, `server/auth.js`, `server/db.js` | Integrator |
-| `server/suggest.js` (Claude prompt + fallback ideas) | Integrator (prompt tweaks: Solo/Network people ask first) |
-| `public/features/profile.js`, `server/profile.js` | Profile |
-| `public/features/solo.js` | Solo squad (2) |
-| `public/features/group.js`, `server/plans.js` | Group squad (2) |
-| `public/features/network.js` | Networking |
-| `public/style.css` | Design |
 
 ## Contracts
 **Feature** (`public/features/*.js`):
@@ -38,17 +37,19 @@ registerFeature({ id, label, icon, render(container, { param }) { /* build UI in
 Routing is `#/<id>/<param>`; e.g. `#/group/ab12cd34` gives `param = 'ab12cd34'`.
 
 **Profile** (`app.profile`, saved per user via `app.saveProfile(p)`):
-`{ mood, energy(1-5), budget('free'|'$'|'$$'|'$$$'), vibes[], groupSize, time, interests[], goal, city, notes }`
+`{ mood, energy(1-5), budget('free'|'$'|'$$'|'$$$'), vibes[], groupSize, time, interests[], goal, city, notes }` (extra fields are allowed and are sent to Claude automatically)
 
 **Idea** (returned by `app.suggest`, rendered by `ui.ideaCard`):
 `{ title, emoji, description, tags[], cost, duration, vibe, mode }`
+
+**Saved ideas** (browser storage): key `saved:<username>` holds an `Idea[]` (Spark writes it, Saved reads/updates it; `done: true` marks completed).
 
 **Suggest**: `app.suggest(mode, context, count)`, mode = `'solo' | 'group' | 'network' | 'icebreakers'`. Resolves `{ ideas, source: 'claude'|'fallback' }`.
 
 **API** (all need login except register/login/me): `POST /api/register|login|logout`, `GET /api/me`, `PUT /api/profile`,
 `POST /api/suggest`, `GET|POST /api/plans`, `GET /api/plans/:id` (opening joins), `POST /api/plans/:id/options`, `POST /api/plans/:id/vote`.
-Add new endpoints in your own server file with `route(method, path, handler)` (see `server/plans.js`); register a new server file with one line in `server/index.js` (ask the integrator).
+Agreed next (group-api builds, group-ui uses): `POST /api/plans/:id/date|comments|rsvp` (see `tasks/group-api.md`).
+Add new endpoints in your own server file with `route(method, path, handler)` (see `server/plans.js`).
 
-## Git workflow
-`git pull --rebase` before every push. Commit and push small and often (~10-15 min). Since files are owned individually, conflicts should not happen.
-If one does, keep both sides and ask the owner.
+## Saving work
+`./scripts/save.sh "what I did"` commits only the caller's own files, syncs with the team (`git pull --rebase`), and pushes. Everyone works on `main`; no branches or PRs. Force-pushes to `main` are rejected by GitHub.

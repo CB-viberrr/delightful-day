@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [{ "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/scripts/guard.js\"" }] }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Read(./.env)", "Edit(./.env)", "Write(./.env)",
+      "Bash(git push --force*)", "Bash(git push -f*)", "Bash(git push * --force*)", "Bash(git push --delete*)", "Bash(git push origin --delete*)",
+      "Bash(git reset --hard*)", "Bash(git clean*)", "Bash(git branch -D*)", "Bash(git rebase*)", "Bash(git commit --amend*)",
+      "Bash(rm -rf*)", "Bash(rm -r *)", "Bash(sudo*)", "Bash(cat .env*)", "Bash(*ANTHROPIC_API_KEY*)"
+    ]
+  }
+}
