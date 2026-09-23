@@ -17,6 +17,7 @@ The exact copy/paste steps are in the group-chat message (also saved in `TEAMMAT
 2. **Refresh your browser.** Is it what you wanted? If not, tell Claude what's wrong, like you'd tell a person.
 3. **Say "save"** every 10-15 minutes. Claude runs `./scripts/save.sh`, which commits **only your files**, syncs with the team, and shares your work. You'll see ✅.
 4. If Claude changed something on the server (files in `server/`), tell it "restart the website".
+5. **Say "sync"** to see your teammates' latest work in your own browser (then refresh). Saving also syncs.
 
 ## Part 3: The 6 rules that keep everyone safe
 1. **Only your files.** Your role's files are listed in `tasks/<role>.md`. Claude is blocked from editing others (you'll see "BLOCKED"). That's normal: ask the owner instead. Don't try to trick the block.

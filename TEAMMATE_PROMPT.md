@@ -57,7 +57,7 @@ Open the address it gives you (http://localhost:3000) and create an account (a f
 
 STEP 6: Save your work every 10-15 minutes
 Just type: save
-Claude shares your work with the team. Nothing you do can break anyone else's part.
+Claude shares your work with the team. Nothing you do can break anyone else's part. To see your teammates' latest work in your own browser, type: sync (then refresh the page).
 
 4 RULES
 1. Only edit your own piece. If Claude says BLOCKED, that's normal. Ask the owner or me.
