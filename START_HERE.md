@@ -5,7 +5,7 @@ You will build one piece of a real website, and **Claude does all the typing**, 
 **The live site (everyone's saved work combined): https://tonight-hackathon.vercel.app**
 
 ## Part 1: Set up (about 15 minutes, once)
-The exact copy/paste steps are in the group-chat message (also saved in `TEAMMATE_PROMPT.md`). In short:
+The exact copy/paste steps are in `GET_STARTED.md`. In short:
 1. Send Charles your GitHub username, then accept the GitHub email invite.
 2. **Get the Claude app** (claude.ai/download), sign in, and open the **Code** tab.
 3. **Pick a folder** called `hackathon` (use "New Folder" in the folder chooser).
