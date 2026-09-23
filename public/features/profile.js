@@ -366,6 +366,8 @@ const STYLES = `
 .profile-complete {width:100%;}
 .profile-edit {display:block;margin:10px auto 0;}
 .profile-heading-dot {color:var(--profile-accent);}
+.profile-handoff-actions {display:flex;flex-wrap:wrap;align-items:center;gap:12px;}
+.profile-handoff-actions a {text-decoration:none;}
 .profile-reset-dialog {width:min(440px,calc(100% - 40px));background:#fffdf6;border:1px solid #d1d3c2;border-radius:12px;color:#323b32;padding:30px;box-shadow:0 20px 90px #202b3430;}
 .profile-reset-dialog::backdrop {background:#26302066;backdrop-filter:blur(3px);}
 .profile-reset-dialog h2 {font-family:Georgia,serif;font-size:29px;font-weight:400;line-height:1.2;margin:0 0 14px;}
@@ -627,10 +629,12 @@ function mount(container, config = {}) {
       body.querySelector('[data-complete]').onclick = async () => {
         if (completionPending || completedThisMount) return;
         completionPending=true; const button=body.querySelector('[data-complete]');button.disabled=true;
+        const nameInput=body.querySelector('#profile-name'), editButton=body.querySelector('[data-edit]');
+        nameInput.disabled=true;editButton.disabled=true;button.setAttribute('aria-busy','true');
         profile.completionState='complete';persist();
         try { await config.onComplete?.(JSON.parse(JSON.stringify(profile))); completedThisMount=true; }
         catch { if(!disposed) announce('Your notebook is ready. The next screen couldn’t open. Please try again.'); }
-        finally {completionPending=false;if(!disposed)button.disabled=false;}
+        finally {completionPending=false;if(!disposed){button.disabled=false;nameInput.disabled=false;editButton.disabled=false;button.removeAttribute('aria-busy');}}
       };
       body.querySelector('#profile-name').onkeydown = e => {if(e.key==='Enter' && !e.isComposing){e.preventDefault();body.querySelector('[data-complete]').click();}};
     } else {
@@ -666,30 +670,79 @@ function mount(container, config = {}) {
  */
 window.BostonOnboarding = Object.freeze({ mount, createProfile, validateProfile, clearQuestion, summaryLabels, toDestination, options: OPTIONS, questions: QUESTIONS });
 
+// Serialize this feature's account writes so a reset cannot be overtaken by
+// an earlier completion. Other profile keys remain owned by their features.
+let accountSaveQueue = Promise.resolve();
+function saveTeamNotebook(notebook) {
+  const owner = app.user;
+  const merged = {...app.profile};
+  if (notebook) merged.bostonNotebook = notebook;
+  else delete merged.bostonNotebook;
+  app.profile = merged;
+  const save = accountSaveQueue.catch(() => {}).then(async () => {
+    if (app.user !== owner) throw new Error('Account changed before save');
+    // Read the other fields when the write starts, preserving intervening edits.
+    const target = {...app.profile};
+    if (notebook) target.bostonNotebook = notebook;
+    else delete target.bostonNotebook;
+    // Same endpoint/body as app.saveProfile, with a session guard so a late
+    // response cannot replace the profile of someone who has just logged in.
+    const result = await api('PUT', '/api/profile', {profile:target});
+    if (app.user === owner) app.profile = result.profile;
+  });
+  accountSaveQueue = save;
+  return save;
+}
+
 registerFeature({
   id: 'profile', label: 'My profile', icon: '📓',
   render(view) {
-    let cleanup;
+    let cleanup, disposed = false, revision = 0;
     function edit(initialProfile) {
+      revision++;
       if (cleanup) cleanup();
-      cleanup = mount(view, {initialProfile, onComplete, onReset: () => {
-        const {bostonNotebook, ...rest} = app.profile;
-        app.profile = rest;
+      cleanup = mount(view, {initialProfile, onComplete, onReset() {
+        revision++;
+        saveTeamNotebook(null).catch(() => {
+          if (!disposed) ui.toast('Cleared for this visit. Account sync didn’t finish.');
+        });
       }});
     }
+    function showHandoff(profile, savedToAccount) {
+      if (cleanup) {cleanup();cleanup=null;}
+      const hasSpark = window.FEATURES.some(feature => feature.id === 'solo');
+      view.innerHTML = `<section class="profile-onboarding" aria-labelledby="profile-handoff-heading"><div class="profile-eyebrow">YOUR NOTEBOOK IS READY</div><h1 id="profile-handoff-heading" tabindex="-1">Tonight in Boston</h1><p class="profile-description">Your Boston map is still being connected. ${hasSpark ? 'You can explore ideas in Spark while the team builds the map.' : 'The map and recommendations screen aren’t connected yet.'}</p><div class="profile-summary-labels">${summaryLabels(profile).map(x=>`<span>${esc(x)}</span>`).join('')}</div><p class="profile-feedback" role="status" data-account-status>${savedToAccount ? 'Saved to your account.' : 'Account save didn’t finish. Your notebook is still available for this visit.'}</p><div class="profile-handoff-actions">${hasSpark ? `<a class="profile-primary" href="#/solo">Open Spark ideas ${arrow}</a>` : ''}<button type="button" class="profile-secondary" data-edit>Edit preferences</button>${savedToAccount ? '' : '<button type="button" class="profile-secondary" data-retry>Retry account save</button>'}</div><p class="profile-description" style="margin-top:24px;font-size:12px">Boston map integration placeholder. Your preferences are available to the shared app; no map recommendations have been generated here.</p></section>`;
+      view.querySelector('[data-edit]').onclick=()=>edit(profile);
+      const retry = view.querySelector('[data-retry]');
+      if (retry) retry.onclick=async () => {
+        const retryRevision=revision;retry.disabled=true;
+        const status=view.querySelector('[data-account-status]');
+        status.textContent='Saving to your account…';
+        try {
+          await saveTeamNotebook(profile);
+          if (disposed || revision !== retryRevision) return;
+          status.textContent='Saved to your account.';retry.remove();
+        } catch {
+          if (disposed || revision !== retryRevision) return;
+          status.textContent='Account save didn’t finish. Your notebook is still available for this visit.';retry.disabled=false;
+        }
+      };
+      view.querySelector('h1').focus();
+    }
     async function onComplete(profile) {
-      const payload = toDestination(profile);
-      // Preserve the established shared-profile fields. No inferred legacy mapping.
-      app.profile = {...app.profile, bostonNotebook: payload.profile};
+      const ownRevision=++revision;
+      const payload=toDestination(profile);
+      let savedToAccount=false;
+      try {await saveTeamNotebook(payload.profile);savedToAccount=true;} catch { /* Device/session draft remains usable. */ }
+      if (disposed || revision !== ownRevision) return;
       window.dispatchEvent(new CustomEvent('boston:onboarding-complete', {detail:payload}));
       // The destination owner supplies this optional adapter and controls routing.
       if (typeof app.openBostonRecommendations === 'function') {
+        if (!savedToAccount) ui.toast('Account save didn’t finish. Your notebook is available for this visit.');
         await app.openBostonRecommendations(payload);
         return;
       }
-      if (cleanup) cleanup();
-      view.innerHTML = `<section class="profile-onboarding"><div class="profile-eyebrow">DEVELOPMENT · INTEGRATION PLACEHOLDER</div><h1>Tonight in Boston</h1><p class="profile-description">Your notebook is ready. The Boston map and recommendations screen aren’t connected yet.</p><div class="profile-summary-labels">${summaryLabels(profile).map(x=>`<span>${esc(x)}</span>`).join('')}</div><p class="profile-description">Tonight is the primary context. Events in the coming week will be secondary. No recommendations have been generated.</p><button type="button" class="profile-primary" data-edit>Edit preferences ${arrow}</button></section>`;
-      view.querySelector('[data-edit]').onclick=()=>edit(profile);
+      showHandoff(payload.profile,savedToAccount);
     }
     // A local draft takes precedence on normal feature re-entry. Explicit Edit
     // uses initialProfile; a first server-provided notebook is only a fallback.
@@ -699,7 +752,7 @@ registerFeature({
       hasLocalDraft ||= !!validateProfile(record?.profile) && (QUESTIONS.includes(record?.screen) || record?.screen === 'summary');
     } catch {}
     edit(hasLocalDraft ? undefined : validateProfile(app.profile?.bostonNotebook) || undefined);
-    return () => {if(cleanup)cleanup();};
+    return () => {disposed=true;revision++;if(cleanup)cleanup();};
   }
 });
 })();
