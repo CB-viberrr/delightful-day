@@ -34,7 +34,7 @@ Source of truth is `ownership.json` (enforced by `scripts/guard.js` and `scripts
 - **Never leave the app broken.** Before saving: refresh the site, click through your tab. If it crashes, fix or `git restore` first.
 - The Integrator pulls regularly, runs the app, and checks that all tabs load. If something breaks main, the owner of the failing file fixes it first, at any priority.
 
-**The live site:** https://tonight-hackathon.vercel.app redeploys from `main` about 30 seconds after every save, so it always shows everyone's saved work together (shared accounts, plans and votes). Check on localhost *first*, then save, then look at the live site. If the live site breaks after your save, tell the Integrator immediately; they can roll back in seconds, then you fix your file.
+**The live site:** https://whatsthemoveboston.com redeploys from `main` about 30 seconds after every save, so it always shows everyone's saved work together (shared accounts, plans and votes). Check on localhost *first*, then save, then look at the live site. If the live site breaks after your save, tell the Integrator immediately; they can roll back in seconds, then you fix your file.
 
 ## 5. Definition of done (for your piece)
 - [ ] Works when you click through it, with a **fresh account** and with a **filled-in profile**

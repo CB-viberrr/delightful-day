@@ -2,7 +2,7 @@
 
 We're building a website that answers "what should we do tonight?" You'll build **one piece** of it. **Claude does all the typing.** You just copy and paste.
 
-**Live site (everyone's work combined): https://tonight-hackathon.vercel.app**
+**Live site (everyone's work combined): https://whatsthemoveboston.com**
 
 ---
 

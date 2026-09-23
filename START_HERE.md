@@ -2,7 +2,7 @@
 
 You will build one piece of a real website, and **Claude does all the typing**, including the setup. Your job: **decide what it should look like and do, check it works, and say "save".** You only use **GitHub** and **Claude on your own laptop**. Hosting, databases and keys are handled by the Integrator (Charles), so you never touch them. The tools stop you from touching things that aren't yours, so you can't break the team's work.
 
-**The live site (everyone's saved work combined): https://tonight-hackathon.vercel.app**
+**The live site (everyone's saved work combined): https://whatsthemoveboston.com**
 
 ## Part 1: Set up (about 15 minutes, once)
 The exact copy/paste steps are in `GET_STARTED.md`. In short:

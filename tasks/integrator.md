@@ -7,7 +7,7 @@
 2. Put the Anthropic API key in your own `.env` (see `.env.example`). Share it privately only if teammates need real Claude on their machines; otherwise they use fallback ideas and that is fine.
 3. Improve the prompt and fallback lists in `server/suggest.js` (make ideas more delightful, more personal). Add new modes only when a teammate asks.
 4. Every ~10 min: `git pull`, run the app, click every tab. Announce breakage immediately.
-5. **Live site (already set up):** https://tonight-hackathon.vercel.app auto-deploys from `main` (Vercel project `tonight-hackathon`, database on Neon project `tiny-frost-40185621`). To get real Claude ideas on it, add the key yourself in Vercel → tonight-hackathon → Settings → Environment Variables (name `ANTHROPIC_API_KEY`, Production), then redeploy. Never put it in git or chat.
+5. **Live site (already set up):** https://whatsthemoveboston.com auto-deploys from `main` (Vercel project `tonight-hackathon`, database on Neon project `tiny-frost-40185621`). To get real Claude ideas on it, add the key yourself in Vercel → tonight-hackathon → Settings → Environment Variables (name `ANTHROPIC_API_KEY`, Production), then redeploy. Never put it in git or chat.
    If a bad save breaks the live site: ask Claude to roll back to the previous deployment, tell the owner, and have them fix it. After the event: turn Vercel Authentication back on and delete the Neon project.
 6. Write the 60-second demo script with Design.
 

@@ -25,8 +25,8 @@ Node 18+, **no npm install needed locally**. The Integrator may add an API key i
 If the app's built-in browser pane is available, show the page there; otherwise give them the address.
 
 ## The live site (one shared website for the whole team)
-**https://tonight-hackathon.vercel.app** is deployed automatically from `main` on GitHub: every save (`./scripts/save.sh`) updates it about 30 seconds later, so it always shows **everyone's** saved work combined. Accounts, plans and votes there are shared by everyone (Postgres database), unlike localhost, which is private to one laptop (its data lives in `data.json`).
-- After a save, tell them: "Saved! The live site updates in about 30 seconds: https://tonight-hackathon.vercel.app". For anything involving several people (group plans, voting), suggest testing on the live site.
+**https://whatsthemoveboston.com** is deployed automatically from `main` on GitHub: every save (`./scripts/save.sh`) updates it about 30 seconds later, so it always shows **everyone's** saved work combined. Accounts, plans and votes there are shared by everyone (Postgres database), unlike localhost, which is private to one laptop (its data lives in `data.json`).
+- After a save, tell them: "Saved! The live site updates in about 30 seconds: https://whatsthemoveboston.com". For anything involving several people (group plans, voting), suggest testing on the live site.
 - **Server code runs as a serverless function on Vercel.** So in `server/`: don't write files, don't keep data in module variables between requests, no timers or background jobs. Keep all data in `db.users` / `db.plans` (plain JSON-able objects) and call `save()` after changing it. Routes that make long outside calls (like Claude) and don't change `db` must pass `{ slow: true }`. No new npm packages.
 - A broken push can break the live site for everyone, so always check the change on localhost first. If the live site breaks after a save, tell them to tell the Integrator immediately (the Integrator can roll back in seconds).
 

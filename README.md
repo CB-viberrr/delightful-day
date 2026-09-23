@@ -4,7 +4,7 @@
 ```
 node server/index.js   # http://localhost:3000, no install needed
 ```
-**Live site (everyone's saved work combined): https://tonight-hackathon.vercel.app**
+**Live site (everyone's saved work combined): https://whatsthemoveboston.com**
 
 | I want to... | Read |
 |---|---|
