@@ -45,6 +45,8 @@ const soloWeather = c => c === 0 ? ['☀️', 'Clear'] : c <= 2 ? ['🌤️', 'P
 const soloWeatherTip = (t, c) => c >= 51 ? 'Cozy night in, or find an indoor adventure.'
   : t < 40 ? 'Bundle up! Hot cocoa weather.' : t > 80 ? 'Warm night: perfect for ice cream.' : 'Great night to be outside.';
 const soloPick = list => list[Math.floor(Math.random() * list.length)];
+const SOLO_MOODS = [['😄', 'happy'], ['😢', 'sad'], ['😴', 'tired'], ['🥳', 'social'], ['⚡', 'wired'], ['💸', 'broke'],
+  ['🧭', 'adventurous'], ['💕', 'romantic'], ['🛋️', 'cozy'], ['😤', 'stressed']];
 
 const soloStyle = document.createElement('style');
 soloStyle.textContent = `
@@ -60,6 +62,14 @@ soloStyle.textContent = `
   .solo-fun .temp { font-size: 28px; font-weight: 800; }
   .solo-fun .clicky { cursor: pointer; user-select: none; transition: transform .15s, border-color .15s; }
   .solo-fun .clicky:hover { border-color: var(--accent2); transform: translateY(-2px); }
+  .solo-mood { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; margin-bottom: 18px; }
+  .solo-mood h2 { margin: 0 0 12px; font-size: 22px; }
+  .solo-mood form { display: flex; gap: 10px; margin-bottom: 12px; }
+  .solo-mood input { flex: 1; font-size: 17px; padding: 12px 16px; border-radius: 999px; }
+  .solo-mood input:focus { outline: none; border-color: var(--accent2); }
+  .solo-mood .chip { font-size: 14px; padding: 6px 14px; }
+  .solo-mood .chip:hover { border-color: var(--accent2); }
+  .solo-for { color: var(--mute); margin: 18px 0 0; }
   .solo-pop { animation: solo-pop .35s ease; }
   @keyframes solo-pop { 0% { transform: scale(.94); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }`;
 document.head.appendChild(soloStyle);
@@ -69,47 +79,71 @@ registerFeature({
   render(view) {
     view.innerHTML = `<section class="page"><h1>What could I do tonight?</h1>
       <p class="sub">Ideas tailored to your profile (${Object.keys(app.profile).length ? 'loaded' : 'fill in Profile for better ideas'}).</p>
-      <div class="row"><button class="btn" id="go">Give me ideas</button><button class="btn ghost" id="wild">🎲 Surprise me</button></div>
+      <div class="solo-mood"><h2>What are you feeling?</h2>
+        <form id="moodForm"><input id="mood" autocomplete="off" placeholder="Type anything: happy, tired, want to dance, need a hug…">
+          <button class="btn" type="submit">Find ideas ✨</button></form>
+        <div id="moodChips">${SOLO_MOODS.map(([e, m]) => `<button class="chip" type="button" data-mood="${m}">${e} ${m}</button>`).join('')}</div>
+      </div>
+      <div class="row"><button class="btn ghost" id="go">Just give me ideas</button><button class="btn ghost" id="wild">🎲 Surprise me</button></div>
+      <p class="solo-for" id="for"></p>
       <div id="out" class="grid"></div>
       <div class="solo-fun"><h2>🎉 While you decide…</h2><div class="solo-fun-grid">
         <div class="card clicky" id="joke" title="Click for another joke"></div>
-        <div class="card" id="word"></div>
-        <div class="card" id="weather"><div class="label">🌤️ Weather tonight</div><div class="muted">Checking the sky…</div></div>
+        <div class="card clicky" id="word" title="Click for another word"></div>
+        <div class="card clicky" id="weather" title="Click for another city"></div>
         <div class="card clicky" id="fact" title="Click for another fact"></div>
       </div></div></section>`;
     const out = view.querySelector('#out');
 
-    // Fun corner: joke + fact change on click, word changes daily, weather is live.
+    // Fun corner: every card shows something new when clicked. Word starts with today's word; weather is live.
     const refresh = (el, html) => { el.innerHTML = html; el.classList.remove('solo-pop'); void el.offsetWidth; el.classList.add('solo-pop'); };
-    const joke = view.querySelector('#joke'), fact = view.querySelector('#fact');
-    const showJoke = () => refresh(joke, `<div class="label">😂 Joke</div><div class="body">${ui.esc(soloPick(SOLO_JOKES))}</div><div class="muted">click for another</div>`);
-    const showFact = () => refresh(fact, `<div class="label">🤯 Fun fact</div><div class="body">${ui.esc(soloPick(SOLO_FACTS))}</div><div class="muted">click for another</div>`);
-    joke.onclick = showJoke; fact.onclick = showFact; showJoke(); showFact();
-    const [w, meaning, use] = SOLO_WORDS[Math.floor(Date.now() / 864e5) % SOLO_WORDS.length];
-    view.querySelector('#word').innerHTML = `<div class="label">📚 Word of the day</div><div class="word">${w}</div>
-      <div class="body">${ui.esc(meaning)}</div><div class="muted">"${ui.esc(use)}"</div>`;
-    (async () => {
-      const box = view.querySelector('#weather'), city = app.profile.city || 'Boston';
+    const more = what => `<div class="muted">click for another ${what}</div>`;
+    const joke = view.querySelector('#joke'), fact = view.querySelector('#fact'), word = view.querySelector('#word'), weather = view.querySelector('#weather');
+    const showJoke = () => refresh(joke, `<div class="label">😂 Joke</div><div class="body">${ui.esc(soloPick(SOLO_JOKES))}</div>${more('joke')}`);
+    const showFact = () => refresh(fact, `<div class="label">🤯 Fun fact</div><div class="body">${ui.esc(soloPick(SOLO_FACTS))}</div>${more('fact')}`);
+    let wordN = Math.floor(Date.now() / 864e5) % SOLO_WORDS.length;
+    const showWord = () => {
+      const [w, meaning, use] = SOLO_WORDS[wordN++ % SOLO_WORDS.length];
+      refresh(word, `<div class="label">📚 Word of the day</div><div class="word">${w}</div>
+        <div class="body">${ui.esc(meaning)}</div><div class="muted">"${ui.esc(use)}"</div>${more('word')}`);
+    };
+    const cities = [...new Set([app.profile.city, 'Boston', 'New York', 'Chicago', 'Miami', 'Los Angeles', 'London', 'Tokyo'].filter(Boolean))];
+    let cityN = 0;
+    const showWeather = async () => {
+      const city = cities[cityN++ % cities.length];
+      refresh(weather, `<div class="label">🌤️ Weather in ${ui.esc(city)}</div><div class="muted">Checking the sky…</div>`);
       try {
         const geo = await (await fetch(`https://geocoding-api.open-meteo.com/v1/search?count=1&name=${encodeURIComponent(city)}`)).json();
         const place = geo.results[0];
         const wx = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code&temperature_unit=fahrenheit`)).json();
         const t = Math.round(wx.current.temperature_2m), c = wx.current.weather_code, [emoji, words] = soloWeather(c);
-        box.innerHTML = `<div class="label">${emoji} Weather in ${ui.esc(place.name)}</div><div class="temp">${t}°F</div>
-          <div class="body">${words}</div><div class="muted">${soloWeatherTip(t, c)}</div>`;
-      } catch { box.innerHTML = `<div class="label">🌤️ Weather tonight</div><div class="body">Couldn't reach the weather. Look out the window? 🪟</div>`; }
-    })();
+        refresh(weather, `<div class="label">${emoji} Weather in ${ui.esc(place.name)}</div><div class="temp">${t}°F</div>
+          <div class="body">${words}</div><div class="muted">${soloWeatherTip(t, c)}</div>${more('city')}`);
+      } catch { refresh(weather, `<div class="label">🌤️ Weather in ${ui.esc(city)}</div><div class="body">Couldn't reach the weather. Look out the window? 🪟</div>${more('city')}`); }
+    };
+    joke.onclick = showJoke; fact.onclick = showFact; word.onclick = showWord; weather.onclick = showWeather;
+    showJoke(); showFact(); showWord(); showWeather();
 
-    const run = async wild => {
+    const moodBox = view.querySelector('#mood'), forLine = view.querySelector('#for');
+    const chips = [...view.querySelectorAll('#moodChips .chip')];
+    const run = async (wild, mood = moodBox.value.trim()) => {
+      forLine.textContent = mood ? `Ideas for when you're feeling "${mood}":` : '';
       out.innerHTML = ui.loading();
       try {
-        const { ideas, source } = await app.suggest('solo', wild ? { wildcard: 'Suggest something unexpected and out of their usual comfort zone' } : {}, wild ? 3 : 5);
+        const context = wild ? { wildcard: 'Suggest something unexpected and out of their usual comfort zone' } : {};
+        if (mood) context.mood = mood;
+        const { ideas, source } = await app.suggest('solo', context, wild ? 3 : 5);
         out.innerHTML = ''; if (source === 'fallback') ui.toast('Using built-in ideas (no Claude key set)');
         ideas.forEach(i => out.appendChild(ui.ideaCard(i, [{ label: '💾 Save', onClick: () => save(i) }])));
       } catch (e) { out.innerHTML = `<div class="card">${ui.esc(e.message)}</div>`; }
     };
     const key = 'saved:' + app.user;
     const save = i => { try { const s = JSON.parse(localStorage[key] || '[]'); s.push(i); localStorage[key] = JSON.stringify(s); ui.toast('Saved!'); } catch {} };
+    view.querySelector('#moodForm').onsubmit = e => { e.preventDefault(); chips.forEach(c => c.classList.remove('on')); run(false); };
+    chips.forEach(c => c.onclick = () => {
+      chips.forEach(x => x.classList.toggle('on', x === c));
+      moodBox.value = c.dataset.mood; run(false);
+    });
     view.querySelector('#go').onclick = () => run(false);
     view.querySelector('#wild').onclick = () => run(true);
     // TODO (Solo squad): saved-ideas list, swipe/shuffle cards, "not feeling it" regenerate, mood quick-picker.
