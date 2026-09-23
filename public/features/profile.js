@@ -88,16 +88,16 @@ const OPTIONS = {
     { id: 'classes_games', label: 'Classes and games' }
   ],
   company: [
-    { id: 'solo', label: 'Happy going solo' },
-    { id: 'meet_people', label: 'Looking to meet people' },
-    { id: 'bringing_someone', label: 'Bringing someone' },
-    { id: 'mix', label: 'A mix' }
+    { id: 'solo', label: 'Happy doing my own thing' },
+    { id: 'meet_people', label: 'Always up for meeting people' },
+    { id: 'bringing_someone', label: 'Usually with a partner or friend' },
+    { id: 'mix', label: 'A mix of all of it' }
   ],
   comfort: [
-    { id: 'structured', label: 'Something structured to do' },
-    { id: 'quieter', label: 'A quieter setting' },
-    { id: 'lively', label: 'A lively atmosphere' },
-    { id: 'short', label: 'An easy, short outing' }
+    { id: 'structured', label: 'Structured plans (classes, events)' },
+    { id: 'quieter', label: 'Quieter, low-key spots' },
+    { id: 'lively', label: 'Lively, buzzing places' },
+    { id: 'short', label: 'Short and easy outings' }
   ],
   budget: [
     { id: 'free', label: 'Free' },
@@ -106,9 +106,9 @@ const OPTIONS = {
     { id: 'flexible', label: 'Flexible' }
   ],
   range: [
-    { id: 'neighborhood', label: 'Stay near my neighborhood' },
-    { id: 'twenty_minutes', label: 'Around 20 minutes away' },
-    { id: 'across_boston', label: 'Across Boston' }
+    { id: 'neighborhood', label: 'I stick close to home' },
+    { id: 'twenty_minutes', label: 'Up to about 20 minutes away' },
+    { id: 'across_boston', label: 'Anywhere in Boston' }
   ],
   transport: [
     { id: 'walk', label: 'Walk' },
@@ -247,147 +247,152 @@ function summaryLabels(profile) {
 function toDestination(profile) {
   const validated = validateProfile(profile);
   if (!validated) throw new TypeError('Invalid Boston profile');
-  return { profile: validated, primaryContext: 'tonight', secondaryContext: 'coming_week' };
+  return { profile: validated, purpose: 'about_me' };
 }
 
 
 const STYLES = `
-.profile-onboarding { --profile-paper:#fffdf6; --profile-ink:#323b32; --profile-muted:#697164; --profile-accent:#a34c31; --profile-border:#d5d7c9; background:#f5f2e9; border-radius:10px; color:var(--profile-ink); font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; max-width:1160px; margin:0 auto; padding:22px 30px 26px; line-height:1.5; }
+.profile-onboarding { --profile-paper:#16173a; --profile-ink:var(--ink); --profile-muted:var(--mute); --profile-accent:var(--accent); --profile-border:var(--line); --profile-grad:linear-gradient(135deg,var(--accent),var(--accent2)); color:var(--ink); font-family:inherit; max-width:1080px; margin:0 auto; padding:0 0 12px; line-height:1.5; }
 .profile-onboarding *, .profile-onboarding *::before, .profile-onboarding *::after {box-sizing:border-box;}
 .profile-onboarding button,.profile-onboarding input {font:inherit;}
 .profile-onboarding button {cursor:pointer;}
-.profile-onboarding button {transition:transform .12s cubic-bezier(.2,.8,.2,1),background-color .14s ease-out,border-color .14s ease-out,color .14s ease-out;}
+.profile-onboarding button {transition:transform .12s cubic-bezier(.2,.8,.2,1),background-color .14s ease-out,border-color .14s ease-out,color .14s ease-out,filter .14s;}
 .profile-onboarding button:not(:disabled):active {transform:scale(.97);}
 .profile-onboarding button:disabled {cursor:default;}
-.profile-onboarding button:focus-visible,.profile-onboarding input:focus-visible,.profile-onboarding h1:focus-visible {outline:3px solid #326a65;outline-offset:5px;}
+.profile-onboarding button:focus-visible,.profile-onboarding input:focus-visible,.profile-onboarding a:focus-visible {outline:2px solid var(--accent2);outline-offset:4px;}
+.profile-onboarding h1:focus-visible {outline:none;}
 .profile-onboarding [hidden] {display:none!important;}
-.profile-topline {display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:38px;font-size:10px;letter-spacing:1.7px;font-weight:600;color:var(--profile-muted);}
-.profile-text-button {background:none;border:0;min-width:44px;min-height:44px;color:var(--profile-muted);padding:8px 0;font-size:13px!important;letter-spacing:0;font-weight:450;}
-.profile-text-button:hover {color:var(--profile-accent);text-decoration:underline;text-underline-offset:4px;}
-.profile-layout {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.94fr);gap:94px;align-items:start;}
-.profile-question-side {min-width:0;padding-top:6px;}
-.profile-progress {display:flex;align-items:center;gap:15px;margin-bottom:29px;color:var(--profile-muted);font-size:12px;}
-.profile-progress-track {display:flex;gap:5px;width:126px;}
-.profile-progress-track span {height:3px;flex:1;border-radius:3px;background:#d9dbce;transition:background-color .18s ease-out;}
-.profile-progress-track .profile-progress-done {background:#5f765f;}
-.profile-progress-track .profile-progress-current {background:var(--profile-accent);}
-.profile-eyebrow {font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--profile-accent);margin-bottom:11px;font-weight:550;}
-.profile-onboarding h1 {scroll-margin-top:95px;font-family:Georgia,"Times New Roman",serif;font-size:43px;font-weight:400;line-height:1.12;letter-spacing:-1.5px;margin:0 0 17px;text-wrap:balance;color:var(--profile-ink);outline:none;}
-.profile-onboarding .profile-description {color:var(--profile-muted);font-size:14px;line-height:1.7;margin:0 0 25px;}
-.profile-question-content {animation:profile-question-in .28s cubic-bezier(.2,.8,.2,1) both;}
+.profile-topline {display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;font-size:12px;letter-spacing:1.6px;font-weight:700;color:var(--mute);}
+.profile-text-button {background:none;border:0;min-width:44px;min-height:40px;color:var(--mute);padding:8px 0;font-size:14px!important;letter-spacing:0;font-weight:600;}
+.profile-text-button:hover {color:var(--ink);}
+.profile-topline .profile-text-button {padding:6px 14px;border:1px solid var(--line);border-radius:999px;min-height:34px;}
+.profile-topline .profile-text-button:hover {background:var(--panel);}
+.profile-layout {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:56px;align-items:start;}
+.profile-question-side {min-width:0;}
+.profile-progress {display:flex;align-items:center;gap:14px;margin-bottom:24px;color:var(--mute);font-size:13px;font-weight:600;}
+.profile-progress-track {display:flex;gap:6px;width:150px;}
+.profile-progress-track span {height:6px;flex:1;border-radius:99px;background:var(--line);transition:background .25s ease-out;}
+.profile-progress-track .profile-progress-done {background:var(--accent2);}
+.profile-progress-track .profile-progress-current {background:var(--profile-grad);box-shadow:0 0 10px #ff8a5c88;}
+.profile-eyebrow {font-size:12px;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:8px;font-weight:800;background:var(--profile-grad);-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content;}
+.profile-onboarding h1 {scroll-margin-top:95px;font-size:36px;font-weight:800;line-height:1.12;letter-spacing:-.5px;margin:0 0 10px;text-wrap:balance;color:var(--ink);outline:none;}
+.profile-onboarding .profile-description {color:var(--mute);font-size:15px;line-height:1.6;margin:0 0 22px;}
+.profile-question-content {animation:profile-question-in .3s cubic-bezier(.2,.8,.2,1) both;}
 .profile-fieldset,.profile-subgroup {padding:0;margin:0;border:0;min-width:0;}
 .profile-choices {display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.profile-choice {position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:62px;border:1px solid var(--profile-border);border-radius:7px;padding:13px 15px;background:#fffdf799;color:var(--profile-ink);cursor:pointer;transition:background .14s,border-color .14s,box-shadow .14s;}
-@media(hover:hover) and (pointer:fine) {.profile-choice:hover {background:#fffdf6;border-color:#a4af9d;}}
-.profile-choice.profile-selected {border-color:#667d60;background:#e9eedf;box-shadow:inset 0 0 0 .5px #667d60;}
+.profile-choice {position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:60px;border:1px solid var(--line);border-radius:16px;padding:13px 16px;background:var(--panel);color:var(--ink);cursor:pointer;transition:background .14s,border-color .14s,box-shadow .2s;}
+@media(hover:hover) and (pointer:fine) {.profile-choice:hover {border-color:#5a4b9a;background:#1f2045;}}
+.profile-choice.profile-selected {border-color:var(--accent2);background:linear-gradient(135deg,#ff8a5c1f,#c86bfa2e),var(--panel);box-shadow:0 0 0 1px var(--accent2),0 6px 22px #c86bfa33;}
 .profile-choice input {position:absolute;opacity:0;min-width:0;width:1px;height:1px;margin:0;padding:0;}
-.profile-choice:has(input:focus-visible) {outline:3px solid #326a65;outline-offset:3px;}
-.profile-choice-content {display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;line-height:1.35;min-width:0;}
-.profile-choice-content small {display:block;color:var(--profile-muted);font-weight:400;font-size:12px;line-height:1.5;margin-top:3px;}
-.profile-choice-indicator {width:16px;height:16px;flex:0 0 16px;border:1px solid #b6beac;border-radius:50%;color:transparent;font-size:12px;line-height:14px;text-align:center;}
-.profile-choice input[type=checkbox]~.profile-choice-indicator {border-radius:4px;}
-.profile-selected .profile-choice-indicator {border-color:#5c7355;box-shadow:inset 0 0 0 3px #e9eedf;background:#5c7355;}
-.profile-selected input[type=checkbox]~.profile-choice-indicator {background:#5c7355;box-shadow:none;color:white;}
+.profile-choice:has(input:focus-visible) {outline:2px solid var(--accent2);outline-offset:3px;}
+.profile-choice-content {display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;line-height:1.35;min-width:0;}
+.profile-choice-content small {display:block;color:var(--mute);font-weight:400;font-size:12px;line-height:1.5;margin-top:3px;}
+.profile-choice-indicator {width:20px;height:20px;flex:0 0 20px;border:2px solid #4a4b7c;border-radius:50%;color:transparent;font-size:12px;font-weight:800;line-height:16px;text-align:center;}
+.profile-choice input[type=checkbox]~.profile-choice-indicator {border-radius:6px;}
+.profile-selected .profile-choice-indicator {border-color:transparent;background:var(--profile-grad);box-shadow:inset 0 0 0 4px var(--panel);}
+.profile-selected input[type=checkbox]~.profile-choice-indicator {box-shadow:none;color:#fff;}
 .profile-choices-company,.profile-choices-comfort,.profile-choices-range {grid-template-columns:1fr;}
 .profile-choices-company .profile-choice,.profile-choices-comfort .profile-choice,.profile-choices-range .profile-choice {min-height:56px;}
-.profile-choice-icon {width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;border-radius:50%;background:#ece8d6;color:#66533a;}
-.profile-choice-icon svg {width:23px;height:23px;}
-.profile-icon-music {background:#e8dfec;color:#69576a;}
-.profile-icon-tree {background:#dfebd8;color:#546e46;}
-.profile-icon-star {background:#f1e5c9;color:#796232;}
-.profile-choices-interests .profile-choice {min-height:77px;padding:12px 11px;gap:6px;}
-.profile-choices-interests .profile-choice-content {font-size:12px;gap:8px;}
-.profile-any {display:flex;align-items:center;gap:9px;min-height:44px;width:fit-content;margin-top:10px;font-size:13px;color:var(--profile-muted);cursor:pointer;}
-.profile-any input {accent-color:#5c7355;min-width:0;width:17px;height:17px;flex:none;margin:0;}
-.profile-feedback {font-size:11px;line-height:1.5;color:var(--profile-muted);min-height:17px;margin:11px 0 15px;}
-.profile-navigation {display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #dedfd3;padding-top:23px;}
-.profile-navigation>div {display:flex;gap:23px;align-items:center;}
+.profile-choice-icon {width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:12px;background:#ff8a5c26;color:#ffb08f;}
+.profile-choice-icon svg {width:21px;height:21px;}
+.profile-icon-music {background:#c86bfa2b;color:#dfa6ff;}
+.profile-icon-tree {background:#5fd49a24;color:#8fe6b8;}
+.profile-icon-star {background:#ffd35c24;color:#ffdf85;}
+.profile-choices-interests .profile-choice {min-height:72px;padding:12px 13px;gap:6px;}
+.profile-choices-interests .profile-choice-content {font-size:14px;gap:10px;}
+.profile-any {display:flex;align-items:center;gap:9px;min-height:40px;width:fit-content;margin-top:10px;font-size:14px;color:var(--mute);cursor:pointer;}
+.profile-any input {accent-color:var(--accent2);min-width:0;width:17px;height:17px;flex:none;margin:0;}
+.profile-feedback {font-size:13px;line-height:1.5;color:var(--mute);min-height:19px;margin:10px 0 14px;}
+.profile-navigation {display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:20px;}
+.profile-navigation>div {display:flex;gap:18px;align-items:center;}
 .profile-back {display:flex;align-items:center;gap:7px;}
 .profile-back:disabled {visibility:hidden;}
 .profile-back svg {width:16px;height:16px;transform:rotate(180deg);}
-.profile-primary {display:inline-flex;align-items:center;justify-content:center;gap:20px;min-height:48px;border:1px solid var(--profile-accent);border-radius:7px;background:var(--profile-accent);color:#fffaf2;font-size:13px!important;font-weight:500;padding:12px 21px;box-shadow:0 2px 2px #62331c0c;}
-.profile-primary:hover {background:#8c3f28;border-color:#8c3f28;}
-.profile-primary:disabled {opacity:.65;}
+.profile-primary {display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:46px;border:0;border-radius:12px;background:var(--profile-grad);color:#fff;font-size:15px!important;font-weight:700;padding:11px 22px;box-shadow:0 6px 20px #c86bfa40;}
+.profile-primary:hover {filter:brightness(1.1);}
+.profile-primary:disabled {opacity:.6;}
 .profile-primary svg {width:18px;height:18px;transition:transform .25s cubic-bezier(.2,.8,.2,1);}
 @media(hover:hover) and (pointer:fine) {.profile-primary:not(:disabled):hover svg {transform:translateX(3px);}}
 .profile-primary:not(:disabled):active svg {transform:translateX(1px);}
-.profile-step-footnote {font-size:10px;color:var(--profile-muted);text-align:center;margin:21px 0 0;}
+.profile-step-footnote {font-size:12px;color:var(--mute);text-align:center;margin:18px 0 0;}
 .profile-notebook-side {position:relative;min-width:0;}
-.profile-notebook {position:relative;min-height:585px;background:var(--profile-paper);border:1px solid #dad7c5;border-radius:5px 10px 10px 5px;box-shadow:5px 6px 0 -1px #eeeadd,6px 7px 0 0 #dcd8c9,10px 17px 29px #453e2920;transform:rotate(2deg);}
-.profile-notebook::before {content:'';position:absolute;inset:0;background-image:radial-gradient(#a39c881b .6px,transparent .6px);background-size:4px 4px;pointer-events:none;border-radius:inherit;}
-.profile-notebook::after {content:'';position:absolute;top:33px;right:-11px;width:17px;height:55px;background:#a65339;border-radius:0 3px 3px 0;z-index:-1;box-shadow:0 1px 1px #543e3520;}
-.profile-binding {position:absolute;left:-13px;top:40px;bottom:38px;display:flex;flex-direction:column;justify-content:space-between;z-index:1;}
-.profile-binding i {display:block;width:22px;height:9px;border:2px solid #898578;border-radius:6px;background:linear-gradient(#d9d4c7,#f0ecdf);box-shadow:1px 2px 1px #39362620;}
-.profile-paper-content {position:relative;padding:29px 33px 23px 40px;min-height:585px;display:flex;flex-direction:column;}
-.profile-paper-top {display:flex;justify-content:space-between;font-size:8px;letter-spacing:1.4px;color:#747566;border-bottom:1px solid #dfddce;padding-bottom:12px;gap:8px;}
-.profile-book-title {font-family:Georgia,"Times New Roman",serif;font-size:64px;line-height:.95;letter-spacing:-2px;margin:26px 0 13px;color:#384733;}
-.profile-book-title em {font-weight:400;color:#b05a3e;}
-.profile-book-subtitle {font-size:11px;color:#6c7161;line-height:1.65;}
-.profile-starting {display:flex;flex-direction:column;gap:4px;position:absolute;top:210px;right:24px;transform:rotate(-6deg);max-width:180px;padding:9px 15px 10px;background:#f0edda;border-radius:1px;font-family:Georgia,serif;font-size:18px;color:#5a654c;box-shadow:0 2px 2px #7e71590b;}
-.profile-tiny-label {font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:7px;letter-spacing:1.2px;color:#76755e;}
-.profile-doodles {position:relative;height:188px;margin:24px 0 0;}
-.profile-doodle-slot {position:absolute;width:110px;text-align:center;}
-.profile-slot-coffee {left:6%;top:7px;--tilt:-9deg;}
-.profile-slot-music {left:51%;top:13px;--tilt:10deg;}
-.profile-slot-tree {left:12%;top:105px;--tilt:-4deg;}
-.profile-slot-star {left:62%;top:107px;--tilt:8deg;}
-.profile-doodle {transform:rotate(var(--tilt));animation:profile-settle .28s both;}
-.profile-doodle svg {width:50px;height:50px;stroke:#5a4b3a;filter:drop-shadow(2px 2px 0 #fffdf6);}
-.profile-slot-coffee svg {fill:#dcae7380;}
-.profile-slot-music svg {fill:#beabcb70;}
-.profile-slot-tree svg {fill:#b5c69f70;}
-.profile-slot-star svg {fill:#e9c05f80;}
-.profile-doodle span {display:block;color:#68705b;font-family:Georgia,serif;font-style:italic;font-size:11px;line-height:1.3;margin-top:3px;}
-.profile-empty-art {position:absolute;inset:30px 0 5px;text-align:center;transform:rotate(-4deg);color:#69715d;}
-.profile-sparkle {display:block;font-family:Georgia,serif;font-size:45px;line-height:1;color:#ba7651;margin:10px 0 9px;}
-.profile-empty-art p {font-family:Georgia,serif;font-size:19px;font-style:italic;line-height:1.5;margin:0;}
-.profile-notebook-notes {display:flex;gap:7px;flex-wrap:wrap;align-content:start;min-height:63px;padding-top:12px;margin-top:14px;border-top:1px solid #e6e2d5;}
-.profile-notebook-notes>span {padding:2px 6px;border-radius:2px;background:#efeddf;color:#5e6a55;font-size:10px;height:fit-content;max-width:100%;}
-.profile-notebook-notes .profile-faint-note {background:none;font-family:Georgia,serif;font-style:italic;padding:0;font-size:12px;}
-.profile-paper-bottom {display:flex;justify-content:space-between;gap:15px;align-items:end;color:#81806f;font-size:7px;letter-spacing:1.1px;margin-top:auto;padding-top:14px;}
+.profile-notebook {position:relative;min-height:560px;background:radial-gradient(420px 260px at 85% 0%,#c86bfa33,transparent),radial-gradient(360px 240px at 0% 100%,#ff8a5c22,transparent),var(--profile-paper);border:1px solid #3b3c72;border-radius:22px;box-shadow:0 24px 60px #05061a99,0 0 0 1px #ffffff08 inset;transform:rotate(1.5deg);}
+.profile-notebook::before {content:'';position:absolute;inset:0;background-image:radial-gradient(#ffffff14 .8px,transparent .8px);background-size:14px 14px;pointer-events:none;border-radius:inherit;}
+.profile-notebook::after {content:'';position:absolute;top:38px;right:-9px;width:14px;height:56px;background:var(--profile-grad);border-radius:0 6px 6px 0;z-index:-1;}
+.profile-binding {position:absolute;left:-11px;top:44px;bottom:44px;display:flex;flex-direction:column;justify-content:space-between;z-index:1;}
+.profile-binding i {display:block;width:22px;height:8px;border-radius:6px;background:linear-gradient(90deg,#6c6da8,#b9b6e6);box-shadow:0 2px 4px #0008;}
+.profile-paper-content {position:relative;padding:28px 32px 24px 38px;min-height:560px;display:flex;flex-direction:column;}
+.profile-paper-top {display:flex;justify-content:space-between;font-size:10px;font-weight:700;letter-spacing:1.6px;color:var(--mute);border-bottom:1px dashed var(--line);padding-bottom:12px;gap:8px;}
+.profile-book-title {font-size:58px;font-weight:800;line-height:.98;letter-spacing:-1.5px;margin:24px 0 12px;color:var(--ink);}
+.profile-book-title em {font-style:normal;background:var(--profile-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.profile-book-subtitle {font-size:14px;color:var(--mute);line-height:1.6;}
+.profile-starting {display:flex;flex-direction:column;gap:3px;position:absolute;top:200px;right:22px;transform:rotate(-5deg);max-width:190px;padding:10px 15px 11px;background:#ffffff10;border:1px solid #ffffff1c;border-radius:14px;backdrop-filter:blur(6px);font-size:17px;font-weight:700;color:var(--ink);box-shadow:0 8px 20px #0006;}
+.profile-tiny-label {font-size:9px;font-weight:800;letter-spacing:1.3px;color:var(--accent);}
+.profile-doodles {position:relative;height:190px;margin:26px 0 0;}
+.profile-doodle-slot {position:absolute;width:120px;text-align:center;}
+.profile-slot-coffee {left:4%;top:6px;--tilt:-8deg;}
+.profile-slot-music {left:52%;top:14px;--tilt:9deg;}
+.profile-slot-tree {left:14%;top:104px;--tilt:-4deg;}
+.profile-slot-star {left:60%;top:106px;--tilt:7deg;}
+.profile-doodle {transform:rotate(var(--tilt));animation:profile-settle .4s both;}
+.profile-doodle svg {width:52px;height:52px;stroke:#f4f1ff;filter:drop-shadow(0 0 10px #c86bfa88);}
+.profile-slot-coffee svg {fill:#ff8a5c55;}
+.profile-slot-music svg {fill:#c86bfa55;}
+.profile-slot-tree svg {fill:#5fd49a44;}
+.profile-slot-star svg {fill:#ffd35c55;}
+.profile-doodle span {display:block;color:var(--mute);font-size:12px;font-weight:600;line-height:1.3;margin-top:5px;}
+.profile-empty-art {position:absolute;inset:26px 0 5px;text-align:center;color:var(--mute);}
+.profile-sparkle {display:block;font-size:42px;line-height:1;margin:8px 0 10px;animation:profile-twinkle 2.6s ease-in-out infinite;}
+.profile-empty-art p {font-size:18px;font-weight:600;line-height:1.5;margin:0;}
+.profile-notebook-notes {display:flex;gap:7px;flex-wrap:wrap;align-content:start;min-height:60px;padding-top:14px;margin-top:14px;border-top:1px dashed var(--line);}
+.profile-notebook-notes>span {padding:4px 11px;border-radius:999px;background:#ffffff14;color:var(--ink);font-size:12px;height:fit-content;max-width:100%;}
+.profile-notebook-notes .profile-faint-note {background:none;padding:0;font-size:13px;color:var(--mute);font-style:italic;}
+.profile-paper-bottom {display:flex;justify-content:space-between;gap:15px;align-items:end;color:var(--mute);font-size:10px;font-weight:700;letter-spacing:1.3px;margin-top:auto;padding-top:14px;text-transform:uppercase;}
 .profile-paper-bottom span:first-child {max-width:60%;overflow-wrap:anywhere;min-height:12px;max-height:34px;overflow:hidden;}
 .profile-paper-bottom span:last-child {flex-shrink:0;}
-.profile-notebook-caption {font-family:Georgia,serif;font-style:italic;font-size:13px;color:#697164;text-align:center;margin:25px -12px 0;}
-.profile-bottomline {display:flex;justify-content:space-between;gap:14px;border-top:1px solid #dddfd2;margin-top:45px;padding-top:18px;font-size:10px;color:#697164;}
-.profile-save {display:flex;align-items:center;gap:7px;}
-.profile-save-dot {width:5px;height:5px;border-radius:50%;background:#7d9271;flex:none;}
-.profile-subgroup legend {font-size:12px;font-weight:600;margin-bottom:10px;padding:0;}
-.profile-subgroup legend span {font-weight:400;color:var(--profile-muted);}
+.profile-notebook-caption {font-size:14px;color:var(--mute);text-align:center;margin:26px -12px 0;}
+.profile-bottomline {display:flex;justify-content:space-between;gap:14px;border-top:1px solid var(--line);margin-top:40px;padding-top:16px;font-size:12px;color:var(--mute);}
+.profile-save {display:flex;align-items:center;gap:8px;}
+.profile-save-dot {width:7px;height:7px;border-radius:50%;background:#5fd49a;box-shadow:0 0 8px #5fd49a;flex:none;}
+.profile-subgroup legend {font-size:14px;font-weight:700;margin-bottom:10px;padding:0;}
+.profile-subgroup legend span {font-weight:400;color:var(--mute);}
 .profile-subgroup+.profile-subgroup {margin-top:20px;}
 .profile-choices-transport {grid-template-columns:repeat(2,1fr);gap:8px;}
-.profile-choices-transport .profile-choice {min-height:48px;padding:10px 13px;}
-.profile-travel-note {font-size:10px;color:var(--profile-muted);margin:14px 0 0;}
-.profile-summary-labels {display:flex;gap:9px;flex-wrap:wrap;margin:28px 0 34px;}
-.profile-summary-labels span {border:1px solid #c8d0b9;background:#e8eddf;padding:8px 13px;border-radius:4px;font-size:13px;color:#4e6346;}
-.profile-name-label {display:block;font-size:13px;margin-bottom:9px;}
-.profile-name-label span {color:var(--profile-muted);margin-left:5px;font-size:12px;}
-.profile-name-input {width:100%;min-width:0!important;min-height:48px;background:#fffdf799!important;border:1px solid var(--profile-border)!important;border-radius:6px!important;padding:12px 14px!important;color:var(--profile-ink)!important;outline-offset:4px;}
-.profile-summary-note {font-size:12px;color:var(--profile-muted);margin:17px 0 27px;}
+.profile-choices-transport .profile-choice {min-height:48px;padding:10px 14px;}
+.profile-travel-note {font-size:12px;color:var(--mute);margin:14px 0 0;}
+.profile-summary-labels {display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 28px;}
+.profile-summary-labels span {border:1px solid var(--accent2);background:#c86bfa22;padding:7px 14px;border-radius:999px;font-size:14px;font-weight:600;color:var(--ink);}
+.profile-name-label {display:block;font-size:14px;font-weight:700;margin-bottom:8px;}
+.profile-name-label span {color:var(--mute);font-weight:400;margin-left:5px;font-size:13px;}
+.profile-name-input {width:100%;min-width:0!important;min-height:46px;}
+.profile-summary-note {font-size:13px;color:var(--mute);margin:14px 0 22px;}
 .profile-complete {width:100%;}
 .profile-edit {display:block;margin:10px auto 0;}
-.profile-heading-dot {color:var(--profile-accent);}
+.profile-heading-dot {color:var(--accent);}
 .profile-handoff-actions {display:flex;flex-wrap:wrap;align-items:center;gap:12px;}
 .profile-handoff-actions a {text-decoration:none;}
-.profile-reset-dialog {width:min(440px,calc(100% - 40px));background:#fffdf6;border:1px solid #d1d3c2;border-radius:12px;color:#323b32;padding:30px;box-shadow:0 20px 90px #202b3430;}
-.profile-reset-dialog::backdrop {background:#26302066;backdrop-filter:blur(3px);}
-.profile-reset-dialog h2 {font-family:Georgia,serif;font-size:29px;font-weight:400;line-height:1.2;margin:0 0 14px;}
-.profile-reset-dialog p {font-size:14px;color:#697164;margin:0 0 25px;}
+.profile-reset-dialog {width:min(440px,calc(100% - 40px));background:var(--panel);border:1px solid var(--line);border-radius:20px;color:var(--ink);padding:28px;box-shadow:0 30px 90px #000a;}
+.profile-reset-dialog::backdrop {background:#07081acc;backdrop-filter:blur(4px);}
+.profile-reset-dialog h2 {font-size:26px;font-weight:800;line-height:1.2;margin:0 0 10px;}
+.profile-reset-dialog p {font-size:15px;color:var(--mute);margin:0 0 24px;}
 .profile-reset-dialog>div {display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;}
-.profile-secondary {padding:10px 15px;border:1px solid #ccd1c0;background:transparent;color:#4f5d49;border-radius:7px;min-height:44px;font-size:13px!important;}
-@keyframes profile-question-in {from {opacity:0;transform:translateY(6px);}to {opacity:1;transform:translateY(0);}}
+.profile-secondary {padding:10px 18px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;min-height:44px;font-size:15px!important;font-weight:700;}
+.profile-secondary:hover {background:#ffffff0d;}
+@keyframes profile-question-in {from {opacity:0;transform:translateY(8px);}to {opacity:1;transform:translateY(0);}}
+@keyframes profile-twinkle {0%,100% {transform:scale(1) rotate(0);opacity:.85;}50% {transform:scale(1.15) rotate(15deg);opacity:1;}}
 @keyframes profile-settle {
-  0% {opacity:0;transform:translate(-3px,5px) rotate(calc(var(--tilt) - 3deg)) scale(.96);animation-timing-function:cubic-bezier(.2,.8,.2,1);}
-  65% {opacity:1;transform:translate(1px,-1px) rotate(calc(var(--tilt) + 1deg)) scale(1.015);animation-timing-function:ease-out;}
+  0% {opacity:0;transform:translate(-3px,8px) rotate(calc(var(--tilt) - 6deg)) scale(.8);animation-timing-function:cubic-bezier(.2,.8,.2,1);}
+  65% {opacity:1;transform:translate(1px,-2px) rotate(calc(var(--tilt) + 2deg)) scale(1.06);animation-timing-function:ease-out;}
   100% {opacity:1;transform:translate(0,0) rotate(var(--tilt)) scale(1);}
 }
 
-@media(max-width:1050px) {.profile-layout {gap:50px;}.profile-onboarding h1 {font-size:39px;}.profile-paper-content {padding-left:31px;padding-right:25px;}.profile-book-title {font-size:60px;}.profile-starting {right:12px;font-size:16px;max-width:155px;}.profile-choices-interests .profile-choice-content {flex-direction:column;align-items:start;}.profile-choices-interests .profile-choice {min-height:97px;}}
+@media(max-width:1050px) {.profile-layout {gap:36px;}.profile-onboarding h1 {font-size:32px;}.profile-paper-content {padding-left:30px;padding-right:24px;}.profile-book-title {font-size:50px;}.profile-starting {right:12px;font-size:15px;max-width:160px;}.profile-choices-interests .profile-choice-content {flex-direction:column;align-items:start;}.profile-choices-interests .profile-choice {min-height:94px;}}
 @media(max-width:760px) {
-.profile-onboarding {padding:10px 20px 20px;max-width:560px;}.profile-topline {margin-bottom:10px;font-size:8px;letter-spacing:1.2px;}.profile-topline .profile-text-button {font-size:11px!important;}
-.profile-layout {display:flex;flex-direction:column;gap:24px;}.profile-question-side {width:100%;padding:0;}.profile-notebook-side {order:-1;width:100%;}.profile-notebook {transform:rotate(.7deg);min-height:128px;border-radius:3px 7px 7px 3px;box-shadow:3px 3px 0 #eeeadd,4px 4px 0 #dcd8c9,5px 8px 18px #453e2910;}.profile-paper-content {min-height:128px;height:128px;padding:14px 17px 12px 23px;}.profile-binding {top:17px;bottom:17px;left:-9px;}.profile-binding i {width:16px;height:7px;border-width:1.5px;}.profile-binding i:nth-child(n+5) {display:none;}.profile-notebook::after {top:20px;height:30px;width:10px;right:-7px;}.profile-paper-top {font-size:6px;letter-spacing:.9px;max-width:45%;padding-bottom:6px;}.profile-paper-top span:last-child {display:none;}.profile-book-title {font-size:32px;line-height:.96;letter-spacing:-.8px;margin:9px 0 0;}.profile-book-title br {display:none;}.profile-book-title em {display:block;}.profile-book-subtitle,.profile-paper-bottom,.profile-notebook-caption,.profile-notebook-notes {display:none;}.profile-starting {left:23px;right:auto;top:auto;bottom:9px;transform:none;padding:0;background:none;font-family:inherit;font-size:9px;max-width:42%;line-height:1.2;}.profile-tiny-label {display:none;}.profile-doodles {position:absolute;right:14px;top:12px;bottom:12px;left:48%;height:auto;margin:0;}.profile-doodle-slot {width:58px;}.profile-doodle svg {width:28px;height:28px;}.profile-doodle span {font-size:7px;margin:1px 0 0;}.profile-slot-coffee {top:0;left:0;}.profile-slot-music {left:57%;top:5px;}.profile-slot-tree {left:12%;top:55px;}.profile-slot-star {left:63%;top:58px;}.profile-empty-art {inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}.profile-sparkle {font-size:28px;margin:0 0 4px;}.profile-empty-art p {font-size:12px;line-height:1.35;}
-.profile-progress {margin-bottom:18px;font-size:11px;gap:12px;}.profile-progress-track {width:110px;}.profile-eyebrow {font-size:9px;margin-bottom:9px;letter-spacing:1.1px;}.profile-onboarding h1 {font-size:33px;letter-spacing:-.8px;line-height:1.13;margin-bottom:12px;}.profile-onboarding .profile-description {font-size:12px;line-height:1.6;margin-bottom:18px;}.profile-choices {gap:8px;}.profile-choice {padding:10px 11px;min-height:50px;}.profile-choice-content {font-size:12px;}.profile-choices-interests .profile-choice-content {flex-direction:row;align-items:center;font-size:11px;}.profile-choices-interests .profile-choice {min-height:62px;}.profile-choice-icon {width:27px;height:27px;flex-basis:27px;}.profile-choice-icon svg {width:20px;height:20px;}.profile-choice-indicator {width:14px;height:14px;flex-basis:14px;line-height:12px;}.profile-navigation {padding-top:16px;}.profile-navigation>div {gap:20px;}.profile-primary {min-height:46px;padding:10px 16px;gap:13px;}.profile-step-footnote {font-size:9px;margin-top:15px;}.profile-feedback {margin:8px 0 12px;}.profile-bottomline {margin-top:27px;font-size:9px;flex-wrap:wrap;}.profile-bottomline>span:last-child {display:none;}.profile-summary-labels {margin:20px 0 25px;gap:7px;}.profile-summary-labels span {font-size:12px;padding:6px 10px;}.profile-summary-note {margin:16px 0 20px;}.profile-subgroup+.profile-subgroup {margin-top:16px;}.profile-choices-range .profile-choice {min-height:48px;}.profile-choices-company .profile-choice,.profile-choices-comfort .profile-choice {min-height:52px;}
+.profile-onboarding {max-width:560px;}.profile-topline {margin-bottom:12px;font-size:10px;letter-spacing:1.2px;}
+.profile-layout {display:flex;flex-direction:column;gap:24px;}.profile-question-side {width:100%;padding:0;}.profile-notebook-side {order:-1;width:100%;}.profile-notebook {transform:rotate(.6deg);min-height:130px;border-radius:16px;}.profile-paper-content {min-height:130px;height:130px;padding:14px 17px 12px 24px;}.profile-binding {top:18px;bottom:18px;left:-8px;}.profile-binding i {width:16px;height:6px;}.profile-binding i:nth-child(n+5) {display:none;}.profile-notebook::after {top:20px;height:30px;width:9px;right:-6px;}.profile-paper-top {font-size:7px;letter-spacing:.9px;max-width:45%;padding-bottom:6px;}.profile-paper-top span:last-child {display:none;}.profile-book-title {font-size:30px;line-height:.98;letter-spacing:-.6px;margin:9px 0 0;}.profile-book-title br {display:none;}.profile-book-title em {display:block;}.profile-book-subtitle,.profile-paper-bottom,.profile-notebook-caption,.profile-notebook-notes {display:none;}.profile-starting {left:24px;right:auto;top:auto;bottom:10px;transform:none;padding:0;background:none;border:0;box-shadow:none;backdrop-filter:none;font-size:11px;max-width:42%;line-height:1.2;}.profile-tiny-label {display:none;}.profile-doodles {position:absolute;right:14px;top:12px;bottom:12px;left:48%;height:auto;margin:0;}.profile-doodle-slot {width:60px;}.profile-doodle svg {width:28px;height:28px;}.profile-doodle span {font-size:8px;margin:1px 0 0;}.profile-slot-coffee {top:0;left:0;}.profile-slot-music {left:57%;top:5px;}.profile-slot-tree {left:12%;top:55px;}.profile-slot-star {left:63%;top:58px;}.profile-empty-art {inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}.profile-sparkle {font-size:26px;margin:0 0 4px;}.profile-empty-art p {font-size:12px;line-height:1.35;}
+.profile-progress {margin-bottom:16px;font-size:12px;gap:12px;}.profile-progress-track {width:120px;}.profile-onboarding h1 {font-size:28px;margin-bottom:8px;}.profile-onboarding .profile-description {font-size:14px;margin-bottom:16px;}.profile-choices {gap:8px;}.profile-choice {padding:10px 12px;min-height:50px;border-radius:14px;}.profile-choice-content {font-size:14px;}.profile-choices-interests .profile-choice-content {flex-direction:row;align-items:center;font-size:13px;}.profile-choices-interests .profile-choice {min-height:60px;}.profile-choice-icon {width:30px;height:30px;flex-basis:30px;}.profile-choice-icon svg {width:18px;height:18px;}.profile-navigation {padding-top:16px;}.profile-primary {min-height:44px;padding:10px 16px;}.profile-bottomline {margin-top:26px;font-size:11px;flex-wrap:wrap;}.profile-bottomline>span:last-child {display:none;}.profile-summary-labels {margin:18px 0 22px;gap:7px;}.profile-summary-labels span {font-size:13px;padding:6px 11px;}
 }
-@media(max-width:355px) {.profile-onboarding {padding-inline:16px;}.profile-choice-content {font-size:11px;}.profile-choices-interests .profile-choice-content {gap:6px;}.profile-choice-icon {display:none;}.profile-primary {font-size:12px!important;gap:8px;padding-inline:12px;}.profile-navigation>div {gap:14px;}.profile-onboarding h1 {font-size:31px;}}
+@media(max-width:355px) {.profile-choice-content {font-size:12px;}.profile-choice-icon {display:none;}.profile-primary {font-size:13px!important;gap:8px;padding-inline:12px;}.profile-navigation>div {gap:12px;}.profile-onboarding h1 {font-size:26px;}}
 @media(prefers-reduced-motion:reduce) {
   .profile-onboarding *, .profile-onboarding *::before,.profile-onboarding *::after {animation:none!important;transition:none!important;scroll-behavior:auto!important;}
   .profile-onboarding button:active,.profile-primary svg {transform:none!important;}
@@ -406,12 +411,12 @@ const svg = (type, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" fill="n
 const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>';
 const esc = value => window.ui.esc(value);
 const INFO = [
- ['Make yourself at home.', 'Where are you starting from?', 'A neighborhood is plenty. No exact address needed.'],
- ['Follow your curiosity.', 'What would get you out the door?', 'Choose up to three. There’s no wrong place to start.'],
- ['Good company is personal.', 'What kind of company sounds good?', 'Pick what feels right for now.'],
- ['Go at your own pace.', 'What would make going out feel easier?', 'Choose up to two. A small outing counts, too.'],
- ['A good time, on your terms.', 'What’s a comfortable spend for an outing?', 'Per person, before transport.'],
- ['A little adventure. Your radius.', 'How far would you go for a good plan?', 'Tell us what feels doable.'],
+ ['Your home base.', 'Where in Boston do you call home?', 'A neighborhood is plenty, no exact address. We use it to find spots near you.'],
+ ['The things you love.', 'What are you into?', 'Choose up to three. These shape every idea the site suggests for you.'],
+ ['Your people.', 'How do you usually like to go out?', 'Pick the one that sounds most like you.'],
+ ['Your style.', 'What kind of plans suit you best?', 'Choose up to two.'],
+ ['Your usual spend.', 'What do you usually like to spend on a night out?', 'Per person, before transport. Spark can always go bigger or smaller on the night.'],
+ ['Your radius.', 'How far are you usually happy to go?', 'Your usual range. Spark handles the specifics.'],
 ];
 const ART_FOR_INTEREST = {food_cafes:'coffee',live_music:'music',sports:'star',art_culture:'star',parks_walks:'tree',classes_games:'star'};
 const sessionDrafts = new Map();
@@ -519,10 +524,10 @@ function mount(container, config = {}) {
     const style = document.createElement('style'); style.id = 'profile-notebook-style'; style.textContent = STYLES; document.head.appendChild(style);
   }
   container.innerHTML = `<section class="profile-onboarding" aria-label="Your Boston notebook">
-    <div class="profile-topline"><span>MAKE ROOM FOR SOMETHING GOOD</span><button type="button" class="profile-text-button" data-reset>Start over</button></div>
+    <div class="profile-topline"><span>LET’S GET TO KNOW YOU</span><button type="button" class="profile-text-button" data-reset>Start over</button></div>
     <div class="profile-layout"><div class="profile-question-side"><div class="profile-progress" aria-label="Onboarding progress"><div class="profile-progress-track">${QUESTIONS.map((_,i)=>`<span data-progress="${i}"></span>`).join('')}</div><span data-step-count></span></div><div data-question></div></div>
-    <aside class="profile-notebook-side" aria-label="Notebook preview"><div class="profile-notebook" aria-hidden="true"><div class="profile-binding">${Array(9).fill('<i></i>').join('')}</div><div class="profile-paper-content"><div class="profile-paper-top"><span>THE POSSIBILITIES EDITION</span><span>VOL. 01</span></div><div class="profile-book-title">Hello,<br><em>Boston.</em></div><div class="profile-book-subtitle">A city of possibilities.<br>A few that feel like you.</div><div class="profile-starting"><span class="profile-tiny-label">MY STARTING POINT</span><span data-notebook-area>Somewhere new</span></div><div class="profile-doodles">${['coffee','music','tree','star'].map(k=>`<div class="profile-doodle-slot profile-slot-${k}" data-slot="${k}"></div>`).join('')}<div class="profile-empty-art" data-empty-art><span class="profile-sparkle">✳</span><p>A little curiosity.<br>A whole city ahead.</p></div></div><div class="profile-notebook-notes" data-notebook-notes></div><div class="profile-paper-bottom"><span data-book-name>YOUR NEXT CHAPTER</span><span>BOSTON, MA ↗</span></div></div></div><p class="profile-notebook-caption">A few little details. A city that feels more like yours.</p></aside>
-    </div><div class="profile-bottomline"><span class="profile-save"><span class="profile-save-dot"></span><span data-save-status role="status"></span></span><span>Just for now. Change it anytime.</span></div>
+    <aside class="profile-notebook-side" aria-label="Notebook preview"><div class="profile-notebook" aria-hidden="true"><div class="profile-binding">${Array(9).fill('<i></i>').join('')}</div><div class="profile-paper-content"><div class="profile-paper-top"><span>THE POSSIBILITIES EDITION</span><span>VOL. 01</span></div><div class="profile-book-title">Hello,<br><em>Boston.</em></div><div class="profile-book-subtitle">A city of possibilities.<br>A few that feel like you.</div><div class="profile-starting"><span class="profile-tiny-label">MY STARTING POINT</span><span data-notebook-area>Somewhere new</span></div><div class="profile-doodles">${['coffee','music','tree','star'].map(k=>`<div class="profile-doodle-slot profile-slot-${k}" data-slot="${k}"></div>`).join('')}<div class="profile-empty-art" data-empty-art><span class="profile-sparkle">✳</span><p>A little curiosity.<br>A whole city ahead.</p></div></div><div class="profile-notebook-notes" data-notebook-notes></div><div class="profile-paper-bottom"><span data-book-name>YOUR NEXT CHAPTER</span><span>BOSTON, MA ↗</span></div></div></div><p class="profile-notebook-caption">The more it knows you, the better every idea gets.</p></aside>
+    </div><div class="profile-bottomline"><span class="profile-save"><span class="profile-save-dot"></span><span data-save-status role="status"></span></span><span>Update it whenever you change.</span></div>
     <dialog class="profile-reset-dialog" aria-labelledby="profile-reset-title" aria-describedby="profile-reset-description"><h2 id="profile-reset-title">Turn to a fresh page?</h2><p id="profile-reset-description">This clears the answers in this notebook on this device.</p><div><button type="button" class="profile-secondary" data-cancel-reset>Keep my notebook</button><button type="button" class="profile-primary" data-confirm-reset>Start over</button></div></dialog>
   </section>`;
   const root = container.querySelector('.profile-onboarding');
@@ -623,7 +628,7 @@ function mount(container, config = {}) {
     if (screen === 6) {
       const labels = summaryLabels(profile);
       const empty = QUESTIONS.every(id=>!hasAnswer(id));
-      body.innerHTML = `<div class="profile-question-content"><div class="profile-eyebrow">A FEW POSSIBILITIES, ALL YOURS</div><h1 tabindex="-1" data-heading>Your Boston<br>notebook<span class="profile-heading-dot">.</span></h1><p class="profile-description">${empty?'Room to discover what you like.':'A little more you. A little more to look forward to.'}</p><div class="profile-summary-labels">${labels.map(label=>`<span>${esc(label)}</span>`).join('')}</div><label class="profile-name-label" for="profile-name">Make it yours <span>(name optional)</span></label><input id="profile-name" class="profile-name-input" type="text" maxlength="40" autocomplete="given-name" placeholder="Your first name" value="${esc(profile.name||'')}"><p class="profile-summary-note">You can change these anytime.</p><button type="button" class="profile-primary profile-complete" data-complete>Find something for tonight ${arrow}</button><button type="button" class="profile-edit profile-text-button" data-edit>Edit preferences</button><p class="profile-feedback" role="status" data-feedback></p></div>`;
+      body.innerHTML = `<div class="profile-question-content"><div class="profile-eyebrow">THIS IS YOU</div><h1 tabindex="-1" data-heading>Your Boston<br>profile<span class="profile-heading-dot">.</span></h1><p class="profile-description">${empty?'Nothing yet. Add a few answers so the site can get to know you.':'Spark, Group plans and Network use this to tailor every idea to you.'}</p><div class="profile-summary-labels">${labels.map(label=>`<span>${esc(label)}</span>`).join('')}</div><label class="profile-name-label" for="profile-name">Make it yours <span>(name optional)</span></label><input id="profile-name" class="profile-name-input" type="text" maxlength="40" autocomplete="given-name" placeholder="Your first name" value="${esc(profile.name||'')}"><p class="profile-summary-note">You can change these anytime.</p><button type="button" class="profile-primary profile-complete" data-complete>Save my profile ${arrow}</button><button type="button" class="profile-edit profile-text-button" data-edit>Edit my answers</button><p class="profile-feedback" role="status" data-feedback></p></div>`;
       body.querySelector('[data-edit]').onclick = () => {screen=0;profile.completionState='in_progress';completedThisMount=false;persist();render(true);};
       body.querySelector('#profile-name').oninput = e => { profile.name=e.target.value;profile.completionState='in_progress';completedThisMount=false;persist();updateNotebook(); };
       body.querySelector('[data-complete]').onclick = async () => {
@@ -646,7 +651,7 @@ function mount(container, config = {}) {
       if (screen===3) fields=choices('comfort',true)+specialChoice('comfort','no_strong_preference','No strong preference');
       if (screen===4) fields=choices('budget');
       if (screen===5) fields=`<fieldset class="profile-subgroup"><legend>Travel range</legend>${choices('range')}</fieldset><fieldset class="profile-subgroup"><legend>Getting there <span>— select any</span></legend>${choices('transport',true)}</fieldset><p class="profile-travel-note">A preference, not a promise of exact travel times.</p>`;
-      body.innerHTML = `<form class="profile-question-content"><div class="profile-eyebrow">${esc(kicker)}</div><h1 tabindex="-1" id="profile-question-heading" data-heading>${esc(title)}</h1><p class="profile-description">${esc(description)}</p><fieldset class="profile-fieldset" aria-labelledby="profile-question-heading">${fields}</fieldset><p id="profile-choice-feedback" class="profile-feedback" role="status" data-feedback></p><div class="profile-navigation"><button type="button" class="profile-back profile-text-button" data-back ${screen===0?'disabled':''}>${arrow} Back</button><div><button type="button" class="profile-skip profile-text-button" data-skip>Skip</button><button type="submit" class="profile-primary">${screen===5?'See my notebook':'Continue'} ${arrow}</button></div></div><p class="profile-step-footnote">${screen===0?'Your city. Your pace. About a minute to make it yours.':'No pressure. You can always come back to this.'}</p></form>`;
+      body.innerHTML = `<form class="profile-question-content"><div class="profile-eyebrow">${esc(kicker)}</div><h1 tabindex="-1" id="profile-question-heading" data-heading>${esc(title)}</h1><p class="profile-description">${esc(description)}</p><fieldset class="profile-fieldset" aria-labelledby="profile-question-heading">${fields}</fieldset><p id="profile-choice-feedback" class="profile-feedback" role="status" data-feedback></p><div class="profile-navigation"><button type="button" class="profile-back profile-text-button" data-back ${screen===0?'disabled':''}>${arrow} Back</button><div><button type="button" class="profile-skip profile-text-button" data-skip>Skip</button><button type="submit" class="profile-primary">${screen===5?'See my notebook':'Continue'} ${arrow}</button></div></div><p class="profile-step-footnote">${screen===0?'About a minute. This is about you in general. Tonight’s plans happen in Spark.':'Not sure? Skip it. You can change any answer later.'}</p></form>`;
       const go = next => { screen=next;persist();render(true); };
       body.querySelector('form').onsubmit = e => {e.preventDefault();go(screen+1);};
       body.querySelector('form').onkeydown = e => {if(e.key==='Enter' && e.target.matches('input[type="radio"],input[type="checkbox"]'))e.preventDefault();};
@@ -672,18 +677,41 @@ window.BostonOnboarding = Object.freeze({ mount, createProfile, validateProfile,
 
 // Serialize this feature's account writes so a reset cannot be overtaken by
 // an earlier completion. Other profile keys remain owned by their features.
+// Readable "who I am" fields from the shared profile contract, so Spark and
+// the idea engine use them directly (they're sent to Claude with every request).
+const BUDGET_TO_COST = {free:'free',under_25:'$',under_50:'$$',flexible:'$$$'};
+function aboutMe(n) {
+  const label = (group, id) => optionLabel(group, id);
+  const out = {city: 'Boston'};
+  if (n.name) out.name = n.name;
+  if (n.neighborhoodAnswer === 'selected') out.neighborhood = label('neighborhood', n.neighborhoodId);
+  if (n.interests.mode === 'open_to_anything') out.interests = ['open to anything'];
+  else if (n.interests.ids.length) out.interests = n.interests.ids.map(id => label('interests', id));
+  if (n.company) { out.company = label('company', n.company); out.groupSize = n.company === 'solo' ? 1 : n.company === 'bringing_someone' ? 2 : undefined; }
+  if (n.comfort.ids.length) out.vibes = n.comfort.ids.map(id => label('comfort', id));
+  if (n.budget) out.budget = BUDGET_TO_COST[n.budget];
+  const travel = [label('range', n.travelRange), ...n.transportIds.map(id => label('transport', id))].filter(Boolean);
+  if (travel.length) out.travel = travel.join(', ');
+  for (const k of Object.keys(out)) if (out[k] === undefined) delete out[k];
+  return out;
+}
+const ABOUT_ME_KEYS = ['name','neighborhood','interests','company','groupSize','vibes','budget','travel'];
+
 let accountSaveQueue = Promise.resolve();
 function saveTeamNotebook(notebook) {
   const owner = app.user;
   const merged = {...app.profile};
-  if (notebook) merged.bostonNotebook = notebook;
+  for (const k of ABOUT_ME_KEYS) delete merged[k];
+  if (notebook) Object.assign(merged, aboutMe(notebook), {bostonNotebook: notebook});
   else delete merged.bostonNotebook;
   app.profile = merged;
   const save = accountSaveQueue.catch(() => {}).then(async () => {
     if (app.user !== owner) throw new Error('Account changed before save');
     // Read the other fields when the write starts, preserving intervening edits.
     const target = {...app.profile};
-    if (notebook) target.bostonNotebook = notebook;
+    // Replace this feature's fields wholesale so skipped answers don't linger.
+    for (const k of ABOUT_ME_KEYS) delete target[k];
+    if (notebook) Object.assign(target, aboutMe(notebook), {bostonNotebook: notebook});
     else delete target.bostonNotebook;
     // Same endpoint/body as app.saveProfile, with a session guard so a late
     // response cannot replace the profile of someone who has just logged in.
@@ -711,7 +739,8 @@ registerFeature({
     function showHandoff(profile, savedToAccount) {
       if (cleanup) {cleanup();cleanup=null;}
       const hasSpark = window.FEATURES.some(feature => feature.id === 'solo');
-      view.innerHTML = `<section class="profile-onboarding" aria-labelledby="profile-handoff-heading"><div class="profile-eyebrow">YOUR NOTEBOOK IS READY</div><h1 id="profile-handoff-heading" tabindex="-1">Tonight in Boston</h1><p class="profile-description">Your Boston map is still being connected. ${hasSpark ? 'You can explore ideas in Spark while the team builds the map.' : 'The map and recommendations screen aren’t connected yet.'}</p><div class="profile-summary-labels">${summaryLabels(profile).map(x=>`<span>${esc(x)}</span>`).join('')}</div><p class="profile-feedback" role="status" data-account-status>${savedToAccount ? 'Saved to your account.' : 'Account save didn’t finish. Your notebook is still available for this visit.'}</p><div class="profile-handoff-actions">${hasSpark ? `<a class="profile-primary" href="#/solo">Open Spark ideas ${arrow}</a>` : ''}<button type="button" class="profile-secondary" data-edit>Edit preferences</button>${savedToAccount ? '' : '<button type="button" class="profile-secondary" data-retry>Retry account save</button>'}</div><p class="profile-description" style="margin-top:24px;font-size:12px">Boston map integration placeholder. Your preferences are available to the shared app; no map recommendations have been generated here.</p></section>`;
+      const hello = profile.name ? `Nice to meet you, ${esc(profile.name)}.` : 'Nice to meet you.';
+      view.innerHTML = `<section class="profile-onboarding" aria-labelledby="profile-handoff-heading"><div class="profile-eyebrow">PROFILE SAVED</div><h1 id="profile-handoff-heading" tabindex="-1">${hello}</h1><p class="profile-description">Every idea on the site now starts from who you are. ${hasSpark ? 'When you want something to do tonight, head to Spark and tell it your mood.' : ''}</p><div class="profile-summary-labels">${summaryLabels(profile).map(x=>`<span>${esc(x)}</span>`).join('')}</div><p class="profile-feedback" role="status" data-account-status>${savedToAccount ? 'Saved to your account.' : 'Account save didn’t finish. Your answers are still saved on this device.'}</p><div class="profile-handoff-actions">${hasSpark ? `<a class="profile-primary" href="#/solo">Plan tonight in Spark ${arrow}</a>` : ''}<button type="button" class="profile-secondary" data-edit>Edit my answers</button>${savedToAccount ? '' : '<button type="button" class="profile-secondary" data-retry>Retry account save</button>'}</div></section>`;
       view.querySelector('[data-edit]').onclick=()=>edit(profile);
       const retry = view.querySelector('[data-retry]');
       if (retry) retry.onclick=async () => {
@@ -724,7 +753,7 @@ registerFeature({
           status.textContent='Saved to your account.';retry.remove();
         } catch {
           if (disposed || revision !== retryRevision) return;
-          status.textContent='Account save didn’t finish. Your notebook is still available for this visit.';retry.disabled=false;
+          status.textContent='Account save didn’t finish. Your answers are still saved on this device.';retry.disabled=false;
         }
       };
       view.querySelector('h1').focus();
