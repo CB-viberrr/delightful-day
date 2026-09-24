@@ -50,6 +50,31 @@ const soloPick = list => list[Math.floor(Math.random() * list.length)];
 // Built-in mood matcher, used when the AI isn't connected. A topic matches if the text has any `words`
 // (and, if given, any `also` words too). Idea rows: [emoji, title, description, cost, duration, tags].
 const SOLO_TOPICS = [
+  { first: true, words: ['game', 'gaming', 'arcade', 'nostalg', 'coolmath', 'childhood', 'grew up', 'growing up', 'play online'], ideas: [
+    ['🐍', 'Snake', 'Eat the apple. Don\'t eat yourself. Harder than it sounds.', 'free', '5 min', ['game', 'classic', '1997'], 'https://www.google.com/fbx?fbx=snake_arcade'],
+    ['🔥', 'Fireboy and Watergirl', 'Two players, one keyboard, and a friendship tested by lava.', 'free', '30 min', ['game', '2-player', '2009'], 'https://www.coolmathgames.com/0-fireboy-and-water-girl-in-the-forest-temple'],
+    ['🍕', 'Papa\'s Pizzeria', 'Take orders, top pies, and survive the pickiest customers on earth.', 'free', '30 min', ['game', 'coolmath', '2007'], 'https://www.coolmathgames.com/0-papas-pizzeria'],
+    ['🐉', 'Neopets', 'Your pet has been waiting since middle school. Please feed it.', 'free', '30 min', ['game', 'nostalgia', '1999'], 'https://www.neopets.com/'],
+    ['🏃', 'Run 3', 'A little alien, an endless tunnel in space. Just one more level.', 'free', '20 min', ['game', 'coolmath', '2014'], 'https://www.coolmathgames.com/0-run-3'],
+    ['🧸', 'Webkinz', 'The stuffed animal with a login. Kinzville is still open.', 'free', '30 min', ['game', 'nostalgia', '2005'], 'https://www.webkinz.com/'],
+    ['🦆', 'Duck Life', 'Train a duck. Win races. Save the farm. Peak childhood.', 'free', '30 min', ['game', 'coolmath', '2009'], 'https://www.coolmathgames.com/0-duck-life'],
+    ['🏝️', 'Poptropica', 'Island-hopping adventures with that unmistakable big-headed avatar.', 'free', '45 min', ['game', 'nostalgia', '2007'], 'https://www.poptropica.com/'],
+    ['🧱', 'Tetris', 'The original. Stack, clear, and hum the music for the rest of the night.', 'free', '15 min', ['game', 'classic', '1984'], 'https://tetris.com/play-tetris'],
+    ['🏍️', 'Moto X3M', 'Stunt bikes, loops and explosions. Every flip shaves off time.', 'free', '20 min', ['game', 'coolmath', '2015'], 'https://www.coolmathgames.com/0-moto-x3m'],
+    ['👻', 'Pac-Man', 'Google\'s playable Pac-Man doodle. Waka waka.', 'free', '10 min', ['game', 'classic', '1980'], 'https://www.google.com/logos/2010/pacman10-i.html'],
+    ['🛷', 'Line Rider', 'Draw a line, watch a tiny sledder ride it. Make it a masterpiece.', 'free', '30 min', ['game', 'creative', '2006'], 'https://www.linerider.com/'],
+    ['🟫', 'Bloxorz', 'Roll a block into a hole. Sounds easy. It is not.', 'free', '20 min', ['game', 'puzzle', '2007'], 'https://www.coolmathgames.com/0-bloxorz'],
+    ['🍪', 'Cookie Clicker', 'Click the cookie. Hire grandmas. Question everything.', 'free', 'forever', ['game', 'idle', '2013'], 'https://orteil.dashnet.org/cookieclicker/'],
+    ['💣', 'Minesweeper', 'The game on every family computer. Tonight you finally learn the rules.', 'free', '10 min', ['game', 'classic', '1990'], 'https://minesweeper.online/'],
+    ['🏛️', 'Temple Run 2', 'Grab the idol and run. Don\'t look back.', 'free', '15 min', ['game', 'runner', '2013'], 'https://poki.com/en/g/temple-run-2'],
+    ['🍬', 'Sugar, Sugar', 'Draw lines to pour sugar into cups. Strangely soothing.', 'free', '20 min', ['game', 'puzzle', '2009'], 'https://www.coolmathgames.com/0-sugar-sugar'],
+    ['🐛', 'Slither.io', 'Snake, but against the whole internet. Get big or get eaten.', 'free', '15 min', ['game', 'multiplayer', '2016'], 'https://slither.io/'],
+    ['🦖', 'Chrome Dino', 'The no-internet dinosaur, now on purpose.', 'free', '5 min', ['game', 'classic', '2014'], 'https://chromedino.com/'],
+    ['🛹', 'Subway Surfers', 'Dodge trains, grab coins, outrun the inspector.', 'free', '15 min', ['game', 'runner', '2012'], 'https://poki.com/en/g/subway-surfers'],
+    ['🟢', 'Agar.io', 'You\'re a cell. Eat the small ones. Flee the big ones.', 'free', '15 min', ['game', 'multiplayer', '2015'], 'https://agar.io/'],
+    ['🔢', '2048', 'Slide the tiles, merge the numbers, lose an hour.', 'free', '15 min', ['game', 'puzzle', '2014'], 'https://play2048.co/'],
+    ['🃏', 'Solitaire', 'The office classic, playable right in Google.', 'free', '10 min', ['game', 'cards', '1990'], 'https://www.google.com/search?q=solitaire'],
+  ] },
   { words: ['sad', 'cry', 'lonely', 'heartbr', 'tear', 'down', 'blue', 'miss'], also: ['movie', 'film', 'watch', 'netflix'], ideas: [
     ['🌙', 'Past Lives', 'Two childhood sweethearts. Twenty-four years. One impossible what-if.', '$', '1h 45m', ['movie', 'tearjerker', '2023']],
     ['🎈', 'Up', 'A widower, a stowaway and ten thousand balloons. You\'ll cry by minute ten.', '$', '1h 36m', ['movie', 'animated', '2009']],
@@ -129,10 +154,14 @@ const SOLO_TOPICS = [
 ];
 const soloMatch = text => {
   const t = text.toLowerCase(), has = list => list.filter(w => t.includes(w)).length;
-  return SOLO_TOPICS.map(topic => ({ topic, score: has(topic.words) * (topic.also ? (has(topic.also) ? 3 : 0) : 1) }))
-    .filter(x => x.score > 0).sort((a, b) => b.score - a.score)
-    .flatMap(x => x.topic.ideas).filter((i, n, all) => all.findIndex(j => j[1] === i[1]) === n).slice(0, 9)
-    .map(([emoji, title, description, cost, duration, tags]) => ({ emoji, title, description, cost, duration, tags, vibe: tags[0], mode: 'solo' }));
+  const hits = SOLO_TOPICS.map(topic => ({ topic, score: has(topic.words) * (topic.also ? (has(topic.also) ? 3 : 0) : 1) }))
+    .filter(x => x.score > 0).sort((a, b) => b.score - a.score);
+  // Specific asks (like "sad movie") go first; the other moods take turns so each one gets ideas in the mix.
+  const firstUp = x => x.topic.also || x.topic.first;
+  const exact = hits.filter(firstUp).flatMap(x => x.topic.ideas), lists = hits.filter(x => !firstUp(x)).map(x => x.topic.ideas);
+  const mixed = [...exact, ...Array.from({ length: Math.max(0, ...lists.map(l => l.length)) }, (_, r) => lists.map(l => l[r]).filter(Boolean)).flat()];
+  return mixed.filter((i, n, all) => all.findIndex(j => j[1] === i[1]) === n).slice(0, 24)
+    .map(([emoji, title, description, cost, duration, tags, link]) => ({ emoji, title, description, cost, duration, tags, vibe: tags[0], mode: 'solo', link }));
 };
 const SOLO_MOODS = [['😄', 'happy'], ['😢', 'sad'], ['😴', 'tired'], ['🥳', 'social'], ['⚡', 'wired'], ['💸', 'broke'],
   ['🧭', 'adventurous'], ['💕', 'romantic'], ['🛋️', 'cozy'], ['😤', 'stressed']];
@@ -158,6 +187,7 @@ soloStyle.textContent = `
   .solo-mood input:focus { outline: none; border-color: var(--accent2); }
   .solo-mood .chip { font-size: 14px; padding: 6px 14px; }
   .solo-mood .chip:hover { border-color: var(--accent2); }
+  .solo-moodhint { color: var(--mute); font-size: 13px; margin-top: 4px; }
   .solo-for { color: var(--mute); margin: 18px 0 0; }
   .solo-wheel { position: relative; height: 600px; perspective: 1400px; overflow: hidden; touch-action: pan-y; user-select: none; margin-top: 6px; }
   .solo-card { position: absolute; left: 50%; top: 14px; width: 340px; background: #14152c; border: 1px solid var(--line); border-radius: 22px;
@@ -195,8 +225,9 @@ registerFeature({
       <p class="sub">Ideas tailored to your profile (${Object.keys(app.profile).length ? 'loaded' : 'fill in Profile for better ideas'}).</p>
       <div class="solo-mood"><h2>What are you feeling?</h2>
         <form id="moodForm"><input id="mood" autocomplete="off" placeholder="Type anything: happy, tired, want to dance, need a hug…">
-          <button class="btn" type="submit">Find ideas ✨</button></form>
+          <button class="btn" type="submit" id="find">Find ideas ✨</button></form>
         <div id="moodChips">${SOLO_MOODS.map(([e, m]) => `<button class="chip" type="button" data-mood="${m}">${e} ${m}</button>`).join('')}</div>
+        <div class="solo-moodhint">Pick as many as you like, then hit Find ideas.</div>
       </div>
       <div class="row"><button class="btn ghost" id="go">Just give me ideas</button><button class="btn ghost" id="wild">🎲 Surprise me</button></div>
       <p class="solo-for" id="for"></p>
@@ -249,16 +280,19 @@ registerFeature({
 
     const moodBox = view.querySelector('#mood'), forLine = view.querySelector('#for');
     const chips = [...view.querySelectorAll('#moodChips .chip')];
-    const run = async (wild, mood = moodBox.value.trim()) => {
-      forLine.textContent = mood ? `Ideas for when you're feeling "${mood}":` : '';
+    // Everything they're feeling: typed text plus every mood button that's switched on.
+    const moods = () => [moodBox.value.trim(), ...chips.filter(c => c.classList.contains('on')).map(c => c.dataset.mood)].filter(Boolean).join(', ');
+    const run = async (wild, mood = moods()) => {
+      forLine.textContent = mood ? `Ideas for when you're feeling ${mood}:` : '';
       out.innerHTML = ui.loading();
       try {
         const context = wild ? { wildcard: 'Suggest something unexpected and out of their usual comfort zone' } : {};
         if (mood) context.mood = mood;
         let { ideas, source } = await app.suggest('solo', context, wild ? 3 : 5);
         // No AI connected: use our own mood matcher so typed moods still get matching ideas.
-        const matched = source === 'fallback' && mood && !wild ? soloMatch(mood) : [];
-        if (matched.length) ideas = matched;
+        // No AI connected (or they asked for games, which need play links): use our own matcher.
+        const matched = mood && !wild ? soloMatch(mood) : [];
+        if (matched.length && (source === 'fallback' || matched[0].link)) ideas = matched;
         else if (source === 'fallback' && mood) ui.toast("Hmm, I didn't catch that mood. Here are some general ideas!");
         out.innerHTML = '';
         forLine.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -272,7 +306,8 @@ registerFeature({
       out.innerHTML = `<div class="solo-wheel">${ideas.map(i => {
         const title = String(i.title || '').replace(/^watch\s+/i, '').replace(/^"(.*)"$/, '$1');
         const hue = [...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 17);
-        const watch = isMovie(i) ? `<a class="solo-watch" target="_blank" rel="noopener" href="https://www.justwatch.com/us/search?q=${encodeURIComponent(title)}">▶ Where to watch</a>` : '';
+        const watch = /^https:\/\//.test(i.link || '') ? `<a class="solo-watch" target="_blank" rel="noopener" href="${ui.esc(i.link)}">🎮 Play now</a>`
+          : isMovie(i) ? `<a class="solo-watch" target="_blank" rel="noopener" href="https://www.justwatch.com/us/search?q=${encodeURIComponent(title)}">▶ Where to watch</a>` : '';
         return `<article class="solo-card">
           <div class="solo-poster" style="background: radial-gradient(circle at 30% 20%, hsl(${hue} 80% 62%), hsl(${(hue + 50) % 360} 60% 30%) 60%, #14152c)"><span>${ui.esc(i.emoji || '✨')}</span></div>
           <div class="solo-cbody"><div class="solo-kicker">${ui.esc((i.tags || []).join(' · '))}</div>
@@ -327,10 +362,12 @@ registerFeature({
     document.addEventListener('keydown', keys);
     const key = 'saved:' + app.user;
     const save = i => { try { const s = JSON.parse(localStorage[key] || '[]'); s.push(i); localStorage[key] = JSON.stringify(s); ui.toast('Saved!'); } catch {} };
-    view.querySelector('#moodForm').onsubmit = e => { e.preventDefault(); chips.forEach(c => c.classList.remove('on')); run(false); };
+    view.querySelector('#moodForm').onsubmit = e => { e.preventDefault(); run(false); };
+    const findBtn = view.querySelector('#find');
     chips.forEach(c => c.onclick = () => {
-      chips.forEach(x => x.classList.toggle('on', x === c));
-      moodBox.value = c.dataset.mood; run(false);
+      c.classList.toggle('on');
+      const n = chips.filter(x => x.classList.contains('on')).length;
+      findBtn.textContent = n > 1 ? `Find ideas for ${n} moods ✨` : 'Find ideas ✨';
     });
     view.querySelector('#go').onclick = () => run(false);
     view.querySelector('#wild').onclick = () => run(true);
