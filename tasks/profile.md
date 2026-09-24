@@ -73,4 +73,8 @@ The static preview uses a warm background because the weather/time landing state
 
 The complete shared shell was tested with its real HTML, styles, core, and all feature files, using mocked account and suggestion endpoints. The checks cover account save and reload, direct Spark entry and request payload, preserved legacy preferences, retry after failure, and leaving/resetting during an in-flight save. There are no automatic suggestion requests on completion. Production asset delivery is checked separately; this does not establish live recommendation quality.
 
-Integrator/design follow-up: at a 390-pixel viewport the existing shared navigation makes the document 424 pixels wide. The notebook itself fits its 342-pixel content width. This feature leaves the shared header and styles to their owners.
+Post-sync verification includes Charles’s Settings/security update and Kathryn’s Spark update, with the current production security headers applied. All six tabs register; notebook completion, account save, Spark navigation, refresh, and the suggestion payload pass. External services are mocked or blocked in these checks.
+
+Integrator/design follow-up: the shared navigation overflows narrow screens after Settings is added (390-pixel viewport, 515-pixel document). The notebook itself fits its 342-pixel content width. This feature leaves the shared header and styles to their owners.
+
+Integrator/Spark follow-up: the current security policy allows connections only to this site, so Spark’s new direct Open-Meteo requests are blocked and its weather fallback appears. Coordinate a permitted weather integration without weakening the shared security policy. This does not prevent notebook saving or the suggestion request.
