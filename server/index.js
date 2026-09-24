@@ -27,7 +27,7 @@ try { userFrom = require('./auth').userFrom; } catch {}
 let chain = Promise.resolve();
 const locked = fn => { const p = chain.then(fn, fn); chain = p.catch(() => {}); return p; };
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.json': 'application/json' };
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.json': 'application/json' };
 const PUBLIC = path.join(__dirname, '..', 'public');
 
 const MAX_BODY = 100000; // bytes
