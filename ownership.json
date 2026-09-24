@@ -5,6 +5,6 @@
   "saved":      { "label": "Saved ideas",    "owns": ["public/features/saved.js", "tasks/saved.md"] },
   "group-ui":   { "label": "Group (screens)","owns": ["public/features/group.js", "tasks/group-ui.md"] },
   "group-api":  { "label": "Group (server)", "owns": ["server/plans.js", "tasks/group-api.md"] },
-  "network":    { "label": "Network",        "owns": ["public/features/network.js", "tasks/network.md"] },
+  "network":    { "label": "Network",        "owns": ["public/features/network.js", "server/friends.js", "tasks/network.md"] },
   "design":     { "label": "Design & demo",  "owns": ["public/style.css", "public/assets/", "tasks/design.md"] }
 }

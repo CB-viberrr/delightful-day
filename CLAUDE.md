@@ -56,6 +56,7 @@ Routing is `#/<id>/<param>`; e.g. `#/group/ab12cd34` gives `param = 'ab12cd34'`.
 
 **API** (all need login except register/login/me): `POST /api/register|login|logout`, `GET /api/me`, `PUT /api/profile`,
 `POST /api/suggest`, `GET|POST /api/plans`, `GET /api/plans/:id` (opening joins), `POST /api/plans/:id/options`, `POST /api/plans/:id/vote`.
+Friends (network, `server/friends.js`): `GET /api/friends`, `POST /api/friends/email|add|respond|remove|invite`, `POST /api/friends/invites/:id`. Any feature can open the invite picker with `app.inviteFriends(idea)`.
 Agreed next (group-api builds, group-ui uses): `POST /api/plans/:id/date|comments|rsvp` (see `tasks/group-api.md`). Account (Integrator): `GET /api/account`, `POST /api/account/password|logout-others|delete`.
 Security (Integrator, in `server/auth.js` + `server/index.js`): hashed session tokens, login lockout, JSON-only + same-origin POSTs, CSP headers. Don't weaken these; inline `<script>` and `onclick="..."` attributes are blocked by CSP, so attach handlers in JS.
 Add new endpoints in your own server file with `route(method, path, handler)` (see `server/plans.js`).

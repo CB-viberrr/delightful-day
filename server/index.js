@@ -16,7 +16,7 @@ function route(method, pattern, handler, { auth = true, slow = false } = {}) {
 }
 const app = { route, HttpError };
 // One broken feature file must never take the whole site down: skip it and keep going.
-const MODULES = { auth: () => require('./auth'), profile: () => require('./profile'), suggest: () => require('./suggest'), plans: () => require('./plans') };
+const MODULES = { auth: () => require('./auth'), profile: () => require('./profile'), suggest: () => require('./suggest'), plans: () => require('./plans'), friends: () => require('./friends') };
 for (const [name, get] of Object.entries(MODULES)) {
   try { get()(app); } catch (e) { console.error(`⚠️ server/${name}.js failed to load and was skipped:`, e.message); }
 }
@@ -47,7 +47,7 @@ async function readBody(req) {
 // Browser safety headers (the live site sets the same ones in vercel.json for static files).
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'same-origin',
-  'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
+  'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
 };
 
 async function handler(req, res) {

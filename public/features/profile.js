@@ -378,6 +378,25 @@ const STYLES = `
 .profile-reset-dialog>div {display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;}
 .profile-secondary {padding:10px 18px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;min-height:44px;font-size:15px!important;font-weight:700;}
 .profile-secondary:hover {background:#ffffff0d;}
+.profile-editor-bar {display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 0 4px;}
+.profile-editor-bar .profile-text-button {min-height:0;padding:0 0 0 6px;color:var(--accent);}
+.profile-editor-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-top:22px;align-items:start;}
+.profile-editor-card {background:#ffffff06;border:1px solid var(--line);border-radius:20px;padding:18px 18px 20px;min-width:0;}
+.profile-editor-card h2 {font-size:17px;font-weight:800;margin:0 0 12px;}
+.profile-editor-card h2:has(+ .profile-editor-hint) {margin-bottom:2px;}
+.profile-editor-hint {font-size:13px;color:var(--mute);margin:0 0 12px;}
+.profile-editor-sub {margin:16px 0 10px;font-weight:700;color:var(--ink);}
+.profile-editor-wide {grid-column:1/-1;}
+.profile-editor-wide .profile-choices-range {grid-template-columns:repeat(3,1fr);}
+.profile-editor-wide .profile-choices-transport {grid-template-columns:repeat(4,1fr);}
+.profile-editor .profile-choice {min-height:48px;padding:10px 13px;border-radius:14px;}
+.profile-editor .profile-choice-content {font-size:14px;}
+.profile-editor .profile-choices-interests .profile-choice {min-height:56px;}
+.profile-editor .profile-choices-interests .profile-choice-content {flex-direction:row;align-items:center;font-size:13px;}
+.profile-editor .profile-choice-icon {width:30px;height:30px;flex-basis:30px;}
+.profile-save-dot.profile-save-busy {background:var(--accent);box-shadow:0 0 8px var(--accent);animation:profile-twinkle 1s ease-in-out infinite;}
+.profile-save-dot.profile-save-error {background:#ff7b7b;box-shadow:0 0 8px #ff7b7b;}
+@media(max-width:760px) {.profile-editor-grid {grid-template-columns:1fr;}.profile-editor-wide .profile-choices-range {grid-template-columns:1fr;}.profile-editor-wide .profile-choices-transport {grid-template-columns:1fr 1fr;}}
 @keyframes profile-question-in {from {opacity:0;transform:translateY(8px);}to {opacity:1;transform:translateY(0);}}
 @keyframes profile-twinkle {0%,100% {transform:scale(1) rotate(0);opacity:.85;}50% {transform:scale(1.15) rotate(15deg);opacity:1;}}
 @keyframes profile-settle {
@@ -736,26 +755,96 @@ registerFeature({
         });
       }});
     }
-    function showHandoff(profile, savedToAccount) {
+    // One-page editor for a finished profile: every answer visible, tap to
+    // change, autosaves to the account. "Retake the quiz" reopens the steps.
+    function showEditor(start, {justSaved = false, savedToAccount = true} = {}) {
       if (cleanup) {cleanup();cleanup=null;}
+      if (!document.getElementById('profile-notebook-style')) {
+        const style = document.createElement('style'); style.id = 'profile-notebook-style'; style.textContent = STYLES; document.head.appendChild(style);
+      }
+      const profile = validateProfile(start) || createProfile();
+      profile.completionState = 'complete';
       const hasSpark = window.FEATURES.some(feature => feature.id === 'solo');
-      const hello = profile.name ? `Nice to meet you, ${esc(profile.name)}.` : 'Nice to meet you.';
-      view.innerHTML = `<section class="profile-onboarding" aria-labelledby="profile-handoff-heading"><div class="profile-eyebrow">PROFILE SAVED</div><h1 id="profile-handoff-heading" tabindex="-1">${hello}</h1><p class="profile-description">Every idea on the site now starts from who you are. ${hasSpark ? 'When you want something to do tonight, head to Spark and tell it your mood.' : ''}</p><div class="profile-summary-labels">${summaryLabels(profile).map(x=>`<span>${esc(x)}</span>`).join('')}</div><p class="profile-feedback" role="status" data-account-status>${savedToAccount ? 'Saved to your account.' : 'Account save didn’t finish. Your answers are still saved on this device.'}</p><div class="profile-handoff-actions">${hasSpark ? `<a class="profile-primary" href="#/solo">Plan tonight in Spark ${arrow}</a>` : ''}<button type="button" class="profile-secondary" data-edit>Edit my answers</button>${savedToAccount ? '' : '<button type="button" class="profile-secondary" data-retry>Retry account save</button>'}</div></section>`;
-      view.querySelector('[data-edit]').onclick=()=>edit(profile);
-      const retry = view.querySelector('[data-retry]');
-      if (retry) retry.onclick=async () => {
-        const retryRevision=revision;retry.disabled=true;
-        const status=view.querySelector('[data-account-status]');
-        status.textContent='Saving to your account…';
-        try {
-          await saveTeamNotebook(profile);
-          if (disposed || revision !== retryRevision) return;
-          status.textContent='Saved to your account.';retry.remove();
-        } catch {
-          if (disposed || revision !== retryRevision) return;
-          status.textContent='Account save didn’t finish. Your answers are still saved on this device.';retry.disabled=false;
-        }
+      const ICON = {food_cafes:'coffee',live_music:'music',sports:'star',art_culture:'star',parks_walks:'tree',classes_games:'star'};
+      const isOn = (group, id) => {
+        if (group === 'neighborhood') return id === 'not_sure' ? profile.neighborhoodAnswer === 'not_sure' : profile.neighborhoodId === id;
+        if (group === 'interests' || group === 'comfort') return profile[group].mode === id || profile[group].ids.includes(id);
+        if (group === 'range') return profile.travelRange === id;
+        if (group === 'transport') return profile.transportIds.includes(id);
+        return profile[group] === id;
       };
+      const opts = (group, multi) => `<div class="profile-choices profile-choices-${group}">${OPTIONS[group].map(o => `<label class="profile-choice"><input data-choice data-group="${group}" type="${multi ? 'checkbox' : 'radio'}" name="edit-${group}" value="${o.id}"><span class="profile-choice-content">${group === 'interests' ? `<span class="profile-choice-icon profile-icon-${ICON[o.id]}">${svg(ICON[o.id])}</span>` : ''}<span>${esc(o.label)}</span></span><span class="profile-choice-indicator" aria-hidden="true">${multi ? '✓' : ''}</span></label>`).join('')}</div>`;
+      const extra = (group, id, label) => `<label class="profile-any"><input data-choice data-group="${group}" type="checkbox" value="${id}"><span>${label}</span></label>`;
+      const card = (emoji, title, hint, body, cls = '') => `<section class="profile-editor-card ${cls}"><h2>${emoji} ${title}</h2>${hint ? `<p class="profile-editor-hint">${hint}</p>` : ''}${body}</section>`;
+      const hello = () => profile.name ? `Nice to meet you, ${esc(profile.name)}.` : 'Your profile';
+      view.innerHTML = `<section class="profile-onboarding profile-editor" aria-labelledby="profile-editor-heading">
+        <div class="profile-topline"><span>${justSaved ? 'PROFILE SAVED 🎉' : 'THIS IS YOU'}</span><button type="button" class="profile-text-button" data-retake>Retake the quiz</button></div>
+        <h1 id="profile-editor-heading" tabindex="-1">${justSaved ? hello() : 'Your profile'}</h1>
+        <p class="profile-description">Tap anything to change it. Changes save automatically and shape every idea on the site.${hasSpark ? ' Plans for tonight happen in Spark.' : ''}</p>
+        <div class="profile-editor-bar"><span class="profile-save"><span class="profile-save-dot" data-dot></span><span data-status role="status"></span><button type="button" class="profile-text-button" data-retry hidden>Try again</button></span>${hasSpark ? `<a class="profile-primary" href="#/solo">Plan tonight in Spark ${arrow}</a>` : ''}</div>
+        <div class="profile-editor-grid">
+          ${card('👋', 'What should we call you?', '', `<input class="profile-name-input" data-name type="text" maxlength="40" autocomplete="given-name" placeholder="Your first name">`)}
+          ${card('🏠', 'Home base', 'Your Boston neighborhood.', opts('neighborhood'))}
+          ${card('💛', 'What you’re into', 'Pick up to three.', opts('interests', true) + extra('interests', 'open_to_anything', 'Open to anything'))}
+          ${card('🧑‍🤝‍🧑', 'How you like to go out', '', opts('company'))}
+          ${card('✨', 'Plans that suit you', 'Pick up to two.', opts('comfort', true) + extra('comfort', 'no_strong_preference', 'No strong preference'))}
+          ${card('💸', 'Usual spend', 'Per person, before transport.', opts('budget'))}
+          ${card('🧭', 'How far you’ll go', '', `${opts('range')}<p class="profile-editor-hint profile-editor-sub">Getting there</p>${opts('transport', true)}`, 'profile-editor-wide')}
+        </div></section>`;
+      const $ = sel => view.querySelector(sel);
+      const nameInput = $('[data-name]'); nameInput.value = profile.name || '';
+      function sync() {
+        view.querySelectorAll('[data-choice]').forEach(input => {
+          input.checked = isOn(input.dataset.group, input.value);
+          input.closest('label').classList.toggle('profile-selected', input.checked);
+        });
+      }
+      let timer, saving = 0;
+      function status(text, state) {
+        $('[data-status]').textContent = text;
+        $('[data-dot]').className = 'profile-save-dot' + (state ? ' profile-save-' + state : '');
+        $('[data-retry]').hidden = state !== 'error';
+      }
+      async function saveNow() {
+        clearTimeout(timer);
+        const mine = ++saving, snapshot = JSON.parse(JSON.stringify(profile));
+        status('Saving…', 'busy');
+        try {
+          try { localStorage.setItem(`tonight:boston-notebook:v1:${app.user || 'guest'}`, JSON.stringify({profile: snapshot, screen: 'summary'})); } catch {}
+          sessionDrafts.delete(`tonight:boston-notebook:v1:${app.user || 'guest'}`);
+          await saveTeamNotebook(snapshot);
+          if (!disposed && mine === saving) status('All changes saved');
+        } catch { if (!disposed && mine === saving) status('Couldn’t save to your account.', 'error'); }
+      }
+      const queueSave = () => { status('Saving…', 'busy'); clearTimeout(timer); timer = setTimeout(saveNow, 450); };
+      function change(group, id, checked) {
+        if (group === 'neighborhood') { profile.neighborhoodAnswer = id === 'not_sure' ? 'not_sure' : 'selected'; profile.neighborhoodId = id === 'not_sure' ? null : id; }
+        else if (group === 'interests' || group === 'comfort') {
+          const special = group === 'interests' ? 'open_to_anything' : 'no_strong_preference', limit = group === 'interests' ? 3 : 2;
+          if (id === special) profile[group] = {mode: checked ? special : 'unanswered', ids: []};
+          else {
+            let ids = profile[group].ids.filter(v => v !== id);
+            if (checked) { if (ids.length >= limit) { ui.toast(`Pick up to ${limit}. Unselect one first.`); sync(); return; } ids = [...ids, id]; }
+            profile[group] = {mode: ids.length ? 'selected' : 'unanswered', ids};
+          }
+        }
+        else if (group === 'range') profile.travelRange = id;
+        else if (group === 'transport') profile.transportIds = checked ? [...new Set([...profile.transportIds, id])] : profile.transportIds.filter(v => v !== id);
+        else profile[group] = id;
+        const q = group === 'range' || group === 'transport' ? 'travel' : group;
+        profile.skippedQuestionIds = profile.skippedQuestionIds.filter(x => x !== q || !hasQuestionAnswer(profile, x));
+        sync();
+        const label = view.querySelector(`[data-group="${group}"][value="${id}"]`)?.closest('label');
+        if (label && label.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) label.animate([{transform:'scale(.97)'},{transform:'translateY(-2px)'},{transform:'none'}], {duration:260, easing:'cubic-bezier(.2,.8,.2,1)'});
+        queueSave();
+      }
+      view.querySelectorAll('[data-choice]').forEach(input => input.onchange = () => change(input.dataset.group, input.value, input.checked));
+      nameInput.oninput = () => { const v = nameInput.value.trim(); if (v) profile.name = v; else delete profile.name; queueSave(); };
+      $('[data-retry]').onclick = saveNow;
+      $('[data-retake]').onclick = () => { clearTimeout(timer); edit(JSON.parse(JSON.stringify(profile))); };
+      sync();
+      status(savedToAccount ? (justSaved ? 'Saved to your account' : 'All changes saved') : 'Couldn’t save to your account.', savedToAccount ? '' : 'error');
+      cleanup = () => { if (timer) { clearTimeout(timer); saveNow(); } };
       view.querySelector('h1').focus();
     }
     async function onComplete(profile) {
@@ -771,7 +860,7 @@ registerFeature({
         await app.openBostonRecommendations(payload);
         return;
       }
-      showHandoff(payload.profile,savedToAccount);
+      showEditor(payload.profile,{justSaved:true,savedToAccount});
     }
     // A local draft takes precedence on normal feature re-entry. Explicit Edit
     // uses initialProfile; a first server-provided notebook is only a fallback.
@@ -780,7 +869,10 @@ registerFeature({
       const record = JSON.parse(localStorage.getItem(`tonight:boston-notebook:v1:${app.user || 'guest'}`) || 'null');
       hasLocalDraft ||= !!validateProfile(record?.profile) && (QUESTIONS.includes(record?.screen) || record?.screen === 'summary');
     } catch {}
-    edit(hasLocalDraft ? undefined : validateProfile(app.profile?.bostonNotebook) || undefined);
+    // A finished profile opens straight into the one-page editor.
+    const accountNotebook = validateProfile(app.profile?.bostonNotebook);
+    if (accountNotebook?.completionState === 'complete') showEditor(accountNotebook);
+    else edit(hasLocalDraft ? undefined : accountNotebook || undefined);
     return () => {disposed=true;revision++;if(cleanup)cleanup();};
   }
 });

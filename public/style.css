@@ -27,3 +27,5 @@ input, textarea { flex:1; min-width:200px; }
 .auth { max-width:380px; margin:10vh auto; text-align:center; } .auth form { display:flex; flex-direction:column; gap:10px; } .err { color:#ff7b7b; min-height:18px; }
 .loading { color:var(--mute); padding:24px; } #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--bg); padding:10px 18px; border-radius:999px; font-weight:700; z-index:9; }
 @media (max-width:700px){ .form{grid-template-columns:1fr} #top{flex-wrap:wrap} }
+.auth-link { color:var(--mute); font-size:14px; margin-top:4px; } .auth-link:hover { color:var(--ink); text-decoration:underline; }
+#top[hidden] { display:none; }
