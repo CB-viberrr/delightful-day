@@ -65,6 +65,32 @@ Reply with ONLY a JSON array, no prose. Each item: {"title": string, "emoji": on
   return arr.map(i => ({ ...i, mode, tags: i.tags || [] }));
 }
 
+// POST /api/details { idea } -> { details: { summary, sections: [{ title, emoji, items[] }], place?, search? } | null }
+// Fills the Spark pop-up: a recipe gets ingredients + steps, an outing gets where/how, a game gets how to play, etc.
+async function askDetails(idea, profile) {
+  const key = process.env.ANTHROPIC_API_KEY; if (!key) return null;
+  const prompt = `A user of a "what should we do tonight?" app opened this idea to see more: ${JSON.stringify(idea)}
+Their profile (JSON): ${JSON.stringify(profile || {})}
+Write the practical details they need to actually do it tonight. Adapt the sections to the kind of idea:
+a recipe gets "Ingredients" and "Steps"; a place or outing gets "Where to go", "Getting there", "What to bring";
+a game or activity gets "How to play" or "How to do it"; a movie gets "Why it fits" and "Pair it with". Always end with a short "Pro tips" section.
+Keep items short (one line each), specific and upbeat. 2-4 sections, 3-8 items each. Never invent URLs or phone numbers.
+Reply with ONLY JSON, no prose: {"summary": 1-2 sentences, "sections": [{"title": string, "emoji": one emoji, "items": [string]}],
+"place": optional real place name + city to look up on a map (omit if none), "search": optional web search query that finds the recipe, venue, or tickets}`;
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST', signal: AbortSignal.timeout(25000),
+    headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+    body: JSON.stringify({ model: process.env.CLAUDE_MODEL || 'claude-sonnet-5', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }),
+  });
+  if (!r.ok) throw new Error('Claude API ' + r.status);
+  const text = (await r.json()).content.map(c => c.text || '').join('');
+  const d = JSON.parse(text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1));
+  const str = v => (typeof v === 'string' ? v.slice(0, 300) : undefined);
+  return { summary: str(d.summary), place: str(d.place), search: str(d.search),
+    sections: (Array.isArray(d.sections) ? d.sections : []).slice(0, 5).map(x => ({ title: str(x.title) || '', emoji: str(x.emoji) || '',
+      items: (Array.isArray(x.items) ? x.items : []).slice(0, 12).map(str).filter(Boolean) })) };
+}
+
 const hits = {}; // per-user rate limit (in memory): 40 requests per 10 minutes
 module.exports = ({ route, HttpError }) => {
   route("POST", "/api/suggest", async ({ body, user }) => {
@@ -75,5 +101,13 @@ module.exports = ({ route, HttpError }) => {
     catch (e) { console.error('suggest fallback:', e.message); }
     const avoid = Array.isArray(body.context && body.context.avoid) ? body.context.avoid : [];
     return { ideas: fallback(mode, n, avoid), source: 'fallback' };
+  }, { slow: true });
+  route("POST", "/api/details", async ({ body, user }) => {
+    const now = Date.now(), h = (hits[user.username] = (hits[user.username] || []).filter(t => now - t < 600000));
+    if (h.length >= 40) throw new HttpError(429, "Slow down a little, try again in a few minutes"); h.push(now);
+    const i = body.idea || {}, idea = { title: String(i.title || '').slice(0, 200), description: String(i.description || '').slice(0, 600),
+      tags: (Array.isArray(i.tags) ? i.tags : []).slice(0, 6).map(t => String(t).slice(0, 40)), cost: String(i.cost || '').slice(0, 20), duration: String(i.duration || '').slice(0, 20) };
+    try { return { details: await askDetails(idea, body.profile) }; }
+    catch (e) { console.error('details fallback:', e.message); return { details: null }; }
   }, { slow: true });
 };

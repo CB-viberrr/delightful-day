@@ -38,8 +38,35 @@ window.ui = {
     }
     return c;
   },
-  loading: msg => `<div class="loading">✨ ${ui.esc(msg || 'Thinking up ideas...')}</div>`,
+  // Bouncing emoji conga line + chunky retro headline that flips through silly status lines. Shrinks inside a .card.
+  loading(msg) {
+    const lines = [msg || 'Cooking up ideas', 'Consulting the moon', 'Bribing the vibes', 'Shaking the fun tree'].map(l => ui.esc(String(l).replace(/\.+$|…$/, '')));
+    return `<div class="loading tl-load" role="status" aria-label="${lines[0]}">
+      <div class="tl-conga">${['🌙', '🍕', '🪩', '🎳', '🍜', '🎸'].map((e, i) => `<span style="--i:${i}">${e}</span>`).join('')}</div>
+      <div class="tl-say"><div class="tl-tick">${[...lines, lines[0]].map(l => `<b>${l}<i>.</i><i>.</i><i>.</i></b>`).join('')}</div></div></div>`;
+  },
 };
+document.head.appendChild(ui.el(`<style>
+  .tl-load { display:flex; flex-direction:column; align-items:center; gap:22px; padding:56px 16px; position:relative; overflow:hidden; border-radius:24px; }
+  .tl-load::before { content:''; position:absolute; inset:-40%; z-index:-1; opacity:.35; filter:blur(40px); animation:tl-spin 6s linear infinite;
+    background:conic-gradient(from 0deg, var(--accent), var(--accent2), #4de1c1, #ffd84d, var(--accent)); }
+  .tl-conga { display:flex; gap:14px; font-size:52px; }
+  .tl-conga span { display:inline-block; animation:tl-hop .9s cubic-bezier(.3,1.6,.5,1) infinite; animation-delay:calc(var(--i) * .11s); filter:drop-shadow(0 10px 12px #0008); }
+  .tl-say { height:1.25em; overflow:hidden; font-size:clamp(26px, 4vw, 40px); font-weight:900; font-style:italic; letter-spacing:-.02em; text-transform:uppercase; }
+  .tl-tick { animation:tl-tick 6s cubic-bezier(.7,-.4,.3,1.4) infinite; }
+  .tl-tick b { display:block; height:1.25em; line-height:1.25em; text-align:center; color:var(--ink); text-shadow:3px 3px 0 var(--accent2), 6px 6px 0 var(--accent); }
+  .tl-tick i { font-style:inherit; display:inline-block; animation:tl-dot 1s infinite; } .tl-tick i:nth-child(2) { animation-delay:.15s; } .tl-tick i:nth-child(3) { animation-delay:.3s; }
+  .card .tl-load, .tl-load.small { padding:18px 8px; gap:10px; } .card .tl-conga, .tl-load.small .tl-conga { font-size:26px; gap:6px; }
+  .card .tl-say, .tl-load.small .tl-say { font-size:18px; } .card .tl-tick b, .tl-load.small .tl-tick b { text-shadow:2px 2px 0 var(--accent2); }
+  @keyframes tl-hop { 0%, 100% { transform:translateY(0) scale(1.15, .85); } 35% { transform:translateY(-34px) rotate(-12deg) scale(.9, 1.1); } 60% { transform:translateY(-10px) rotate(8deg); } }
+  @keyframes tl-tick { 0%, 20% { transform:translateY(0); } 25%, 45% { transform:translateY(-1.25em); } 50%, 70% { transform:translateY(-2.5em); } 75%, 95% { transform:translateY(-3.75em); } 100% { transform:translateY(-5em); } }
+  @keyframes tl-dot { 0%, 100% { opacity:.2; } 50% { opacity:1; } }
+  @keyframes tl-spin { to { transform:rotate(1turn); } }
+  @media (prefers-reduced-motion: reduce) { .tl-load *, .tl-load::before { animation:none !important; } }
+</style>`));
+
+// app.details(idea) -> Promise<{ summary, sections: [{ title, emoji, items[] }], place?, search? } | null>. null = no AI connected.
+app.details = idea => api('POST', '/api/details', { idea, profile: app.profile }).then(r => r.details).catch(() => null);
 
 // app.inviteFriends(idea) -> opens a friend picker; resolves the new planId (or null if cancelled).
 // Any feature can use it: ui.ideaCard(i, [{ label: '💌 Invite', onClick: i => app.inviteFriends(i) }])

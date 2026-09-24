@@ -304,6 +304,15 @@ const SOLO_ACTIVITIES = [['🎮', 'games'], ['🎬', 'movies & tv'], ['🎵', 's
 const SOLO_MOODS = [['😄', 'happy'], ['😢', 'sad'], ['😴', 'tired'], ['🥳', 'social'], ['⚡', 'wired'], ['💸', 'broke'],
   ['🧭', 'adventurous'], ['💕', 'romantic'], ['🛋️', 'cozy'], ['😤', 'stressed']];
 
+const soloTitle = i => String(i.title || '').replace(/^watch\s+/i, '').replace(/^"(.*)"$/, '$1');
+const soloBg = title => {
+  const hue = [...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 17);
+  return `background: radial-gradient(circle at 30% 20%, hsl(${hue} 80% 62%), hsl(${(hue + 50) % 360} 60% 30%) 60%, #14152c)`;
+};
+// Play link for games, "where to watch" for movies, nothing otherwise.
+const soloWatch = i => /^https:\/\//.test(i.link || '') ? `<a class="solo-watch" target="_blank" rel="noopener" href="${ui.esc(i.link)}">${ui.esc(i.linkLabel || '🎮 Play now')}</a>`
+  : (i.tags || []).some(t => /^(movie|film|tv)$/i.test(t)) ? `<a class="solo-watch" target="_blank" rel="noopener" href="https://www.justwatch.com/us/search?q=${encodeURIComponent(soloTitle(i))}">▶ Where to watch</a>` : '';
+
 const soloStyle = document.createElement('style');
 soloStyle.textContent = `
   .solo-fun { margin-top: 36px; }
@@ -338,24 +347,29 @@ soloStyle.textContent = `
   .solo-ddnote { font-size: 12px; color: var(--mute); margin-bottom: 8px; }
   .solo-clear { font: inherit; font-size: 13px; background: none; border: 0; color: var(--mute); cursor: pointer; text-decoration: underline; }
   .solo-for { color: var(--mute); margin: 18px 0 0; }
-  .solo-wheel { position: relative; height: 600px; perspective: 1400px; overflow: hidden; touch-action: pan-y; user-select: none; margin-top: 6px; }
+  .solo-wheel { position: relative; height: 580px; perspective: 1400px; overflow: hidden; touch-action: pan-y; user-select: none; margin-top: 6px; }
   .solo-card { position: absolute; left: 50%; top: 14px; width: 340px; background: #14152c; border: 1px solid var(--line); border-radius: 22px;
+    height: 540px; display: flex; flex-direction: column;
     overflow: hidden; box-shadow: 0 30px 70px #0009; cursor: pointer; transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .45s, filter .45s; }
   .solo-card:not(.on) { filter: brightness(.6); }
-  .solo-card.on { cursor: grab; border-color: #ffffff2a; }
-  .solo-poster { height: 240px; display: grid; place-items: center; font-size: 104px; position: relative; }
+  .solo-card.on { cursor: pointer; border-color: #ffffff2a; }
+  .solo-card.on:hover { border-color: var(--accent2); box-shadow: 0 30px 70px #0009, 0 0 0 1px var(--accent2), 0 0 40px #c86bfa44; }
+  .solo-poster { height: 200px; flex: none; display: grid; place-items: center; font-size: 104px; position: relative; }
   .solo-poster::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 50%, #14152c); }
   .solo-poster span { filter: drop-shadow(0 12px 24px #0007); z-index: 1; }
-  .solo-poster.art { height: 280px; display: block; }
+  .solo-poster.art { height: 200px; display: block; }
   .solo-poster.art svg { width: 100%; height: 100%; display: block; }
   .solo-poster.art::after { background: linear-gradient(transparent 70%, #14152c); }
-  .solo-cbody { padding: 0 28px 26px; position: relative; }
-  .solo-kicker { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--mute); margin-bottom: 10px; }
-  .solo-ctitle { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: 36px; line-height: 1.05; margin: 0 0 12px; font-weight: 600; letter-spacing: -.01em; }
-  .solo-cdesc { font-family: Georgia, serif; font-style: italic; font-size: 17px; line-height: 1.5; color: #d9d6f2; margin: 0 0 16px; }
-  .solo-meta { font-size: 13px; color: var(--mute); margin-bottom: 20px; letter-spacing: .04em; }
-  .solo-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-  .solo-actions a, .solo-actions button { font: inherit; font-size: 14px; font-weight: 700; padding: 9px 16px; border-radius: 999px; cursor: pointer; text-decoration: none; }
+  .solo-cbody { padding: 0 26px 22px; position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .solo-clamp { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+  .solo-kicker { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--mute); margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: none; }
+  .solo-ctitle { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: 30px; line-height: 1.08; margin: 0 0 10px; -webkit-line-clamp: 3; flex: none; font-weight: 600; letter-spacing: -.01em; }
+  .solo-cdesc { font-family: Georgia, serif; font-style: italic; font-size: 16px; line-height: 1.45; color: #d9d6f2; margin: 0 0 12px; -webkit-line-clamp: 4; }
+  .solo-meta { font-size: 13px; color: var(--mute); margin: auto 0 14px; letter-spacing: .04em; flex: none; }
+  .solo-actions { display: flex; gap: 8px; flex-wrap: nowrap; flex: none; }
+  .solo-actions a, .solo-actions button { font: inherit; font-size: 14px; font-weight: 700; padding: 9px 14px; border-radius: 999px; cursor: pointer; text-decoration: none; white-space: nowrap; }
+  .solo-actions .solo-more { background: transparent; color: var(--mute); border: 0; margin-left: auto; padding: 9px 2px; }
+  .solo-card.on .solo-more { color: var(--ink); } .solo-more:hover { color: var(--accent) !important; }
   .solo-watch { background: var(--ink); color: var(--bg); border: 0; }
   .solo-love { background: transparent; color: var(--ink); border: 1px solid #ffffff40; }
   .solo-love:hover { border-color: var(--accent); }
@@ -366,6 +380,32 @@ soloStyle.textContent = `
   .solo-dots button { width: 8px; height: 8px; border-radius: 4px; border: 0; padding: 0; background: var(--line); cursor: pointer; transition: all .3s; }
   .solo-dots button.on { width: 24px; background: var(--accent); }
   .solo-hint { text-align: center; color: var(--mute); font-size: 13px; margin-top: 10px; }
+  .solo-modal { position: fixed; inset: 0; z-index: 8; background: #07081acc; backdrop-filter: blur(8px); display: grid; place-items: center; padding: 24px;
+    animation: solo-fade .2s ease-out; }
+  .solo-sheet { width: min(860px, 100%); max-height: calc(100vh - 48px); overflow: auto; background: #14152c; border: 1px solid #ffffff2a; border-radius: 26px;
+    box-shadow: 0 40px 120px #000c; position: relative; animation: solo-rise .45s cubic-bezier(.2,1.3,.4,1); }
+  .solo-hero { display: flex; align-items: flex-end; gap: 22px; padding: 34px 34px 26px; position: relative; }
+  .solo-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 40%, #14152c); pointer-events: none; }
+  .solo-hero > * { position: relative; z-index: 1; }
+  .solo-hemoji { font-size: 96px; line-height: 1; filter: drop-shadow(0 12px 24px #0008); animation: solo-wobble 3s ease-in-out infinite; }
+  .solo-hero .solo-ctitle { font-size: 40px; margin: 6px 0 0; }
+  .solo-x { position: absolute; top: 14px; right: 14px; z-index: 2; width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ffffff30;
+    background: #0f1024aa; color: var(--ink); font-size: 20px; cursor: pointer; } .solo-x:hover { border-color: var(--accent); transform: rotate(90deg); transition: transform .2s; }
+  .solo-mbody { padding: 0 34px 32px; }
+  .solo-mbody .solo-cdesc { font-size: 19px; }
+  .solo-facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+  .solo-facts span { background: #ffffff12; border-radius: 999px; padding: 6px 12px; font-size: 14px; }
+  .solo-mbody .solo-actions { flex-wrap: wrap; margin-bottom: 24px; }
+  .solo-summary { font-size: 16px; line-height: 1.5; color: #d9d6f2; margin: 0 0 18px; }
+  .solo-secs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .solo-sec { background: #ffffff08; border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; animation: solo-pop .35s ease backwards; }
+  .solo-sec h4 { margin: 0 0 10px; font-size: 15px; text-transform: uppercase; letter-spacing: .08em; }
+  .solo-sec ul, .solo-sec ol { margin: 0; padding-left: 20px; line-height: 1.5; } .solo-sec li { margin-bottom: 4px; }
+  .solo-sec ol li::marker { color: var(--accent); font-weight: 800; }
+  .solo-note { color: var(--mute); font-size: 14px; margin-top: 14px; }
+  @keyframes solo-fade { from { opacity: 0; } }
+  @keyframes solo-rise { from { opacity: 0; transform: translateY(40px) scale(.94); } }
+  @keyframes solo-wobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg) scale(1.05); } }
   .solo-pop { animation: solo-pop .35s ease; }
   @keyframes solo-pop { 0% { transform: scale(.94); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }`;
 document.head.appendChild(soloStyle);
@@ -483,19 +523,15 @@ registerFeature({
     // Card wheel: one big card in front, neighbours angled behind. Swipe, drag, arrows, dots or ← → keys; loops around.
     let go = null;
     const showWheel = ideas => {
-      const isMovie = i => (i.tags || []).some(t => /^(movie|film|tv)$/i.test(t));
       out.innerHTML = `<div class="solo-wheel">${ideas.map(i => {
-        const title = String(i.title || '').replace(/^watch\s+/i, '').replace(/^"(.*)"$/, '$1');
-        const hue = [...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 17);
-        const watch = /^https:\/\//.test(i.link || '') ? `<a class="solo-watch" target="_blank" rel="noopener" href="${ui.esc(i.link)}">${ui.esc(i.linkLabel || '🎮 Play now')}</a>`
-          : isMovie(i) ? `<a class="solo-watch" target="_blank" rel="noopener" href="https://www.justwatch.com/us/search?q=${encodeURIComponent(title)}">▶ Where to watch</a>` : '';
+        const title = soloTitle(i), watch = soloWatch(i);
         return `<article class="solo-card">
           ${SOLO_POSTERS[title] ? `<div class="solo-poster art">${SOLO_POSTERS[title]}</div>`
-            : `<div class="solo-poster" style="background: radial-gradient(circle at 30% 20%, hsl(${hue} 80% 62%), hsl(${(hue + 50) % 360} 60% 30%) 60%, #14152c)"><span>${ui.esc(i.emoji || '✨')}</span></div>`}
+            : `<div class="solo-poster" style="${soloBg(title)}"><span>${ui.esc(i.emoji || '✨')}</span></div>`}
           <div class="solo-cbody"><div class="solo-kicker">${ui.esc((i.tags || []).join(' · '))}</div>
-            <h3 class="solo-ctitle">${ui.esc(title)}</h3><p class="solo-cdesc">${ui.esc(i.description || '')}</p>
+            <h3 class="solo-ctitle solo-clamp">${ui.esc(title)}</h3><p class="solo-cdesc solo-clamp">${ui.esc(i.description || '')}</p>
             <div class="solo-meta">${ui.esc([i.duration, i.cost].filter(Boolean).join('  ·  '))}</div>
-            <div class="solo-actions">${watch}<button class="solo-love" type="button">Love it 💾</button></div></div></article>`;
+            <div class="solo-actions">${watch}<button class="solo-love" type="button">Love it 💾</button><button class="solo-more" type="button">More ↗</button></div></div></article>`;
       }).join('')}<button class="solo-arrow solo-prev" type="button" aria-label="Previous">‹</button><button class="solo-arrow solo-next" type="button" aria-label="Next">›</button></div>
         <div class="solo-dots">${ideas.map(() => '<button type="button"></button>').join('')}</div>
         <div class="solo-hint">Swipe, drag or use ← → to browse</div>`;
@@ -514,7 +550,11 @@ registerFeature({
       };
       let startX = null, dragged = false;
       cards.forEach((c, i) => {
-        c.onclick = e => { if (dragged || i === cur) return; e.preventDefault(); go(i); };
+        c.onclick = e => {
+          if (dragged) return;
+          if (i !== cur) { e.preventDefault(); go(i); return; }
+          if (!e.target.closest('a, .solo-love')) openDetails(ideas[i]);
+        };
         c.querySelector('.solo-love').onclick = e => {
           if (i !== cur) return; e.stopPropagation(); save(ideas[i]);
           e.target.textContent = 'Loved ✓'; e.target.disabled = true;
@@ -537,11 +577,55 @@ registerFeature({
       go(0);
     };
     const keys = e => {
-      if (!go || e.target.matches('input, textarea, select')) return;
+      if (!go || e.target.matches('input, textarea, select') || document.querySelector('.solo-modal')) return;
       const cur = [...out.querySelectorAll('.solo-card')].findIndex(c => c.classList.contains('on'));
       if (e.key === 'ArrowRight') go(cur + 1); if (e.key === 'ArrowLeft') go(cur - 1);
     };
     document.addEventListener('keydown', keys);
+    // Details pop-up: the idea up top, then Claude's adaptive how-to (recipe, directions, how to play...) loads underneath.
+    const detailCache = new Map();
+    const openDetails = idea => {
+      const title = soloTitle(idea), q = encodeURIComponent(title);
+      const cooking = (idea.tags || []).some(t => /cook|recipe|bak|food|dinner/i.test(t));
+      const m = ui.el(`<div class="solo-modal" role="dialog" aria-modal="true" aria-label="${ui.esc(title)}"><div class="solo-sheet">
+        <button class="solo-x" type="button" aria-label="Close">✕</button>
+        <div class="solo-hero" style="${soloBg(title)}"><div class="solo-hemoji">${ui.esc(idea.emoji || '✨')}</div>
+          <div><div class="solo-kicker">${ui.esc((idea.tags || []).join(' · '))}</div><h2 class="solo-ctitle">${ui.esc(title)}</h2></div></div>
+        <div class="solo-mbody"><p class="solo-cdesc">${ui.esc(idea.description || '')}</p>
+          <div class="solo-facts">${[['⏱️', idea.duration], ['💸', idea.cost], ['✨', idea.vibe]].filter(f => f[1]).map(([e, v]) => `<span>${e} ${ui.esc(v)}</span>`).join('')}</div>
+          <div class="solo-actions">${soloWatch(idea)}<button class="solo-love" type="button">Love it 💾</button>
+            <button class="solo-love solo-inv" type="button">💌 Invite friends</button>
+            <a class="solo-love solo-web" target="_blank" rel="noopener" href="https://www.google.com/search?q=${q}${cooking ? '+recipe' : ''}">${cooking ? '🍳 Find the recipe' : '🔎 Look it up'}</a></div>
+          <div class="solo-more-info">${ui.loading('Digging up the details')}</div></div></div></div>`);
+      const close = () => { m.remove(); document.removeEventListener('keydown', esc, true); };
+      const esc = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+      document.addEventListener('keydown', esc, true);
+      m.onclick = e => { if (e.target === m) close(); };
+      m.querySelector('.solo-x').onclick = close;
+      const love = m.querySelector('.solo-love');
+      love.onclick = () => { save(idea); love.textContent = 'Loved ✓'; love.disabled = true; };
+      m.querySelector('.solo-inv').onclick = () => { close(); app.inviteFriends(idea); };
+      document.body.appendChild(m);
+      m.querySelector('.solo-x').focus();
+      const info = m.querySelector('.solo-more-info'), web = m.querySelector('.solo-web');
+      if (!detailCache.has(title)) detailCache.set(title, app.details(idea));
+      detailCache.get(title).then(d => {
+        if (!m.isConnected) return;
+        if (!d || !d.sections || !d.sections.length) {
+          detailCache.delete(title);
+          info.innerHTML = `<p class="solo-note">🔌 Step-by-step details need the AI switched on. Meanwhile, the buttons above will get you there!</p>`;
+          return;
+        }
+        if (d.search) web.href = 'https://www.google.com/search?q=' + encodeURIComponent(d.search);
+        const map = d.place ? `<a class="solo-love" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent(d.place)}">📍 ${ui.esc(d.place)}</a>` : '';
+        if (map) web.insertAdjacentHTML('afterend', map);
+        info.innerHTML = `${d.summary ? `<p class="solo-summary">${ui.esc(d.summary)}</p>` : ''}<div class="solo-secs">${d.sections.map((sec, n) => {
+          const tag = /step|how|method|direction|instruction|plan/i.test(sec.title) ? 'ol' : 'ul';
+          return `<div class="solo-sec" style="animation-delay:${n * 90}ms"><h4>${ui.esc(sec.emoji)} ${ui.esc(sec.title)}</h4>
+            <${tag}>${sec.items.map(x => `<li>${ui.esc(x)}</li>`).join('')}</${tag}></div>`;
+        }).join('')}</div>`;
+      });
+    };
     const key = 'saved:' + app.user;
     const save = i => { try { const s = JSON.parse(localStorage[key] || '[]'); s.push(i); localStorage[key] = JSON.stringify(s); ui.toast('Saved!'); } catch {} };
     view.querySelector('#moodForm').onsubmit = e => { e.preventDefault(); run(false); };
