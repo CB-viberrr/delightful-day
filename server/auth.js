@@ -119,11 +119,13 @@ module.exports = ({ route, HttpError }) => {
     return { email: user.email };
   });
 
-  // Forgot password: always answers the same way, so it never reveals which emails have accounts.
+  // Forgot password by username OR email. The link always goes to the email saved on the account.
+  // Always answers the same way, so it never reveals which usernames/emails exist or have an email.
   route('POST', '/api/password/forgot', async ({ body, req }) => {
-    const email = String(body.email || '').trim().toLowerCase();
-    const u = EMAIL_RE.test(email) ? byEmail(email) : null;
-    if (u && !(u.reset && u.reset.sent > Date.now() - 60000)) { // at most one email a minute per account
+    const login = String(body.login || body.email || '').trim().toLowerCase().slice(0, 254);
+    const u = login.includes('@') ? (EMAIL_RE.test(login) ? byEmail(login) : null)
+      : /^[a-z0-9_]{2,20}$/.test(login) && own(db.users, login) ? db.users[login] : null;
+    if (u && u.email && !(u.reset && u.reset.sent > Date.now() - 60000)) { // at most one email a minute per account
       const token = crypto.randomBytes(32).toString('hex');
       u.reset = { hash: sha(token), exp: Date.now() + 30 * 60000, sent: Date.now() }; save();
       const origin = process.env.VERCEL ? `https://${req.headers.host}` : `http://${req.headers.host}`;

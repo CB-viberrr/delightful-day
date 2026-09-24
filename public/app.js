@@ -27,8 +27,8 @@ function authScreen(mode = 'login') {
 
 function forgotScreen() {
   topbar.hidden = true;
-  view.innerHTML = `<div class="auth card"><h1>🔑 Forgot password?</h1><p class="sub">Enter the email on your account and we'll send you a reset link.</p>
-    <form id="f"><input name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+  view.innerHTML = `<div class="auth card"><h1>🔑 Forgot password?</h1><p class="sub">Enter your username or email and we'll email you a reset link.</p>
+    <form id="f"><input name="login" placeholder="Username or email" autocomplete="username" required>
     <div class="err" id="err"></div><button class="btn">Send reset link</button>
     <button type="button" class="btn ghost" id="back">Back to log in</button></form></div>`;
   const f = view.querySelector('#f');
@@ -36,9 +36,9 @@ function forgotScreen() {
   f.onsubmit = async e => {
     e.preventDefault();
     try {
-      await api('POST', '/api/password/forgot', { email: f.email.value });
-      view.querySelector('.auth').innerHTML = `<h1>📬 Check your inbox</h1><p class="sub">If an account uses <b>${ui.esc(f.email.value)}</b>, a reset link is on its way. It works for 30 minutes.</p>
-        <p class="sub">No email on your account? Ask a teammate or the Integrator for help.</p><button class="btn ghost" id="back">Back to log in</button>`;
+      await api('POST', '/api/password/forgot', { login: f.login.value });
+      view.querySelector('.auth').innerHTML = `<h1>📬 Check your inbox</h1><p class="sub">If <b>${ui.esc(f.login.value)}</b> matches an account with an email, a reset link is on its way to that email. It works for 30 minutes.</p>
+        <p class="sub">Never added an email? Ask the Integrator to help you get back in, then add one in Settings.</p><button class="btn ghost" id="back">Back to log in</button>`;
       view.querySelector('#back').onclick = () => authScreen();
     } catch (err) { view.querySelector('#err').textContent = err.message; }
   };
