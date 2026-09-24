@@ -44,7 +44,96 @@ const soloWeather = c => c === 0 ? ['☀️', 'Clear'] : c <= 2 ? ['🌤️', 'P
   : c <= 48 ? ['🌫️', 'Foggy'] : c <= 67 ? ['🌧️', 'Rainy'] : c <= 77 ? ['❄️', 'Snowy'] : c <= 82 ? ['🌦️', 'Showers'] : ['⛈️', 'Stormy'];
 const soloWeatherTip = (t, c) => c >= 51 ? 'Cozy night in, or find an indoor adventure.'
   : t < 40 ? 'Bundle up! Hot cocoa weather.' : t > 80 ? 'Warm night: perfect for ice cream.' : 'Great night to be outside.';
+// Real hourly forecast from Open-Meteo (downloaded 2026-09-24, good for 16 days). Used when the site blocks live weather.
+const SOLO_FORECAST = {"Boston":{"start":1790208000,"t":[54,53,52,52,51,51,51,51,50,50,51,51,55,59,61,62,62,63,62,62,61,60,58,55,54,53,52,51,51,52,51,52,51,51,53,54,57,59,60,61,61,60,60,59,59,58,58,57,56,57,57,56,56,56,56,56,55,55,55,55,55,55,54,54,54,54,54,54,54,54,54,54,54,54,55,54,55,55,55,55,55,55,55,55,55,55,54,55,54,54,54,54,54,55,56,56,56,56,56,56,56,56,56,56,56,55,54,53,53,53,53,53,53,53,53,53,53,53,54,54,54,54,54,55,55,55,55,55,55,55,55,55,56,56,57,58,58,58,58,59,60,61,60,60,59,59,59,59,59,59,59,58,58,57,57,58,59,61,63,64,65,66,66,66,66,66,65,64,63,62,61,61,61,62,62,63,64,64,65,66,66,66,65,66,68,71,74,74,73,72,70,67,65,64,63,62,61,60,60,59,57,57,56,55,56,58,61,63,65,67,68,68,68,67,65,63,61,59,58,57,57,56,56,55,55,55,55,55,57,59,62,65,68,69,70,70,70,69,68,66,64,62,61,60,60,59,59,58,58,58,58,58,58,58,58,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,59,60,60,59,59,58,58,57,57,57,57,57,57,57,57,57,57,57,57,57,56,56,57,57,57,57,57,57,57,56,55,54,54,54,54,53,52,52,51,50,50,50,49,50,52,56,58,60,61,62,62,62,62,60,58,56,55,54,53,53,52,52,51,51,50,50,50,50,52,54,55,56,56,56,56,56,55,55,54,54,53,53,52,52,52,52,52,52,52,52,52,53,55,58,60,62,63,63,null,null,null,null,null],"c":[0,1,0,1,0,0,0,0,0,1,1,2,1,2,1,1,1,1,0,0,3,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,51,51,3,51,53,51,53,61,63,63,63,63,63,63,65,63,51,51,53,53,53,51,51,51,63,63,61,53,63,61,63,63,63,55,53,51,53,51,51,53,63,61,61,61,80,80,61,55,51,51,53,61,55,61,55,53,51,53,53,53,53,53,53,51,51,51,51,51,51,51,3,3,3,51,51,51,51,51,51,51,51,51,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,1,1,1,0,0,0,1,1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,61,61,61,53,53,53,3,2,1,1,0,0,0,0,0,0,0,0,1,1,2,2,1,0,0,0,0,0,0,0,0,0,1,1,2,3,3,3,3,3,3,3,2,1,0,0,1,2,3,3,3,3,2,2,2,2,2,2,2,2,2,3,3,51,51,51,53,53,53,53,53,53,63,63,63,63,63,63,81,81,81,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,3,3,3,3,3,3,3,3,3,51,51,51,61,61,61,63,63,63,63,63,63,63,63,63,55,55,55,53,53,53,51,51,51,3,3,3,2,2,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,3,3,3,3,2,2,1,0,1,2,3,3,3,2,2,2,3,3,3,3,3,3,3,3,3,2,2,1,1,2,3,3,null,null,null,null,null]},"New York":{"start":1790208000,"t":[62,59,57,55,54,53,52,52,51,51,50,50,52,56,57,59,61,61,62,65,65,65,64,62,60,58,56,55,54,53,52,51,51,52,52,52,54,58,61,64,67,70,71,73,73,73,70,68,66,66,64,63,62,61,60,60,59,59,58,58,59,62,64,67,69,72,73,73,74,73,71,69,68,66,63,61,59,59,58,57,57,57,56,56,56,57,57,58,59,56,56,57,57,57,57,58,58,57,58,57,57,57,57,58,58,58,58,57,58,59,59,62,64,67,68,68,68,68,67,66,66,65,65,64,64,64,63,63,63,63,62,62,62,64,66,68,70,72,74,75,75,74,73,71,69,69,69,69,68,67,67,66,66,65,65,65,65,66,68,69,70,71,72,72,71,71,71,70,70,70,70,71,70,70,70,70,70,69,69,68,67,67,68,68,69,71,72,71,70,69,68,67,66,65,63,62,61,61,60,59,59,58,58,58,59,60,63,66,68,71,72,73,73,73,72,71,69,68,67,66,66,65,64,64,63,63,63,63,63,64,65,66,65,64,62,61,60,59,59,59,59,59,60,60,61,61,61,61,61,61,61,61,61,62,62,63,64,65,66,68,69,70,69,68,67,66,66,65,65,65,65,65,65,65,65,65,65,65,65,65,64,64,63,63,63,64,63,63,63,63,63,63,63,63,62,62,61,61,61,61,61,61,60,59,59,59,59,59,59,59,59,59,59,58,57,56,55,55,54,53,53,53,52,52,53,55,58,60,62,64,65,65,66,66,65,64,63,62,61,60,59,58,58,57,56,56,56,55,56,57,59,61,62,63,64,64,63,63,63,62,62,62,62,62,62,62,61,61,61,61,60,60,61,61,63,64,64,65,65,null,null,null,null,null],"c":[1,3,3,3,3,1,2,1,1,2,1,1,1,3,3,3,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,3,3,3,3,3,3,3,2,3,0,0,0,1,0,0,0,0,0,0,0,0,0,1,3,3,3,3,53,61,53,53,61,63,61,61,61,61,55,51,3,3,53,51,3,3,3,51,51,51,55,51,51,51,3,51,51,3,3,51,53,51,3,3,3,3,3,3,3,3,3,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,2,2,1,0,0,0,0,1,1,2,3,3,3,3,2,1,0,0,0,0,0,0,0,1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,53,53,53,80,80,80,80,80,80,2,1,0,0,0,0,0,0,1,1,2,2,2,1,1,1,0,0,0,0,1,1,2,3,3,2,2,2,2,2,1,1,1,1,2,2,1,1,0,1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,53,53,53,55,55,55,53,53,53,53,53,53,80,80,80,51,51,51,3,3,3,3,3,3,3,2,2,1,1,1,0,0,0,0,1,45,2,3,3,3,3,3,51,51,51,61,61,61,61,61,61,80,80,80,53,53,53,53,53,53,53,53,53,51,51,51,53,53,53,51,51,51,53,53,53,3,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,2,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,3,3,3,null,null,null,null,null]},"Chicago":{"start":1790208000,"t":[61,61,61,61,59,58,57,57,57,57,57,58,58,59,61,61,62,62,63,64,64,65,65,64,63,63,63,63,63,63,61,60,59,58,57,57,56,58,58,59,61,63,63,63,63,63,63,63,63,63,63,63,62,62,61,61,60,60,59,58,58,60,62,64,65,66,67,68,68,68,66,65,63,62,62,62,61,61,60,60,59,59,59,59,58,60,63,65,67,68,69,69,67,66,66,65,63,63,63,63,62,62,62,62,61,61,60,60,60,62,65,68,70,71,72,72,71,70,69,67,66,65,65,65,64,64,63,63,62,62,61,60,61,63,67,70,72,74,74,74,73,71,70,68,67,65,63,63,63,65,66,66,67,67,65,62,59,57,56,55,54,53,53,54,55,56,57,57,57,58,59,59,58,57,55,55,54,54,53,52,53,54,57,60,63,65,67,69,70,70,68,66,65,64,63,62,61,61,60,59,59,58,58,57,57,59,62,65,68,70,72,73,74,73,72,70,68,67,66,65,64,63,62,61,61,61,60,59,59,60,63,65,66,68,69,69,68,67,66,64,62,61,61,61,60,59,58,58,58,58,58,57,57,57,58,58,58,58,57,56,54,53,52,52,52,53,53,53,53,53,53,52,52,53,53,53,53,53,54,55,55,55,55,56,57,57,56,55,54,54,54,53,53,52,51,51,50,49,49,48,48,50,53,55,58,61,63,64,64,63,62,61,59,59,58,57,57,56,55,54,54,53,52,51,51,53,56,58,60,63,65,65,66,66,65,63,62,61,60,59,58,58,57,57,56,56,55,55,56,57,58,59,61,63,65,66,67,68,68,68,67,68,68,67,66,65,64,63,61,60,59,58,58,59,61,62,64,65,66,null,null,null,null,null],"c":[3,3,3,3,1,1,0,1,0,2,1,3,1,1,3,1,0,0,0,0,1,0,2,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,3,3,3,3,0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,2,1,0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,0,3,1,0,0,0,0,0,0,0,1,1,2,3,3,3,3,3,2,1,0,0,0,0,0,1,2,2,3,3,3,3,3,3,3,3,51,51,51,63,63,63,63,63,63,82,82,82,63,63,63,51,51,51,53,53,53,3,3,3,3,3,3,3,3,3,2,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,3,3,3,3,3,3,3,3,3,2,2,1,1,0,0,0,0,0,1,2,2,3,3,3,3,3,3,3,3,3,2,2,51,51,51,3,3,3,3,3,3,51,51,51,53,53,53,51,51,51,51,51,51,51,51,51,51,51,51,3,3,3,3,3,3,3,3,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,3,3,3,3,3,3,3,3,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,51,51,51,2,1,1,0,0,0,0,0,0,0,0,0,null,null,null,null,null]},"Miami":{"start":1790208000,"t":[77,77,77,76,76,76,76,75,76,76,75,76,76,78,80,82,84,84,85,86,86,85,84,81,79,78,77,77,77,77,76,75,75,75,74,74,75,77,80,79,83,83,86,86,84,84,83,83,83,83,82,81,81,81,81,81,81,81,80,80,80,81,82,83,85,85,85,84,83,82,82,81,81,81,81,81,81,81,81,81,81,81,81,80,80,81,82,83,84,84,83,84,84,83,82,82,82,82,81,81,81,81,81,81,81,80,80,81,81,81,82,83,84,83,84,84,84,83,83,82,82,82,82,82,82,81,81,81,81,81,81,81,81,82,82,83,83,84,85,85,84,84,84,83,83,83,82,82,82,82,82,82,82,82,82,82,83,83,84,84,85,85,85,85,85,85,85,84,83,83,83,83,83,82,81,81,81,81,81,81,81,82,83,84,85,85,86,86,85,85,85,84,84,84,84,84,84,84,84,83,83,83,83,83,83,84,84,84,85,86,87,87,87,87,86,85,85,84,84,84,84,84,84,84,83,83,83,83,83,84,85,86,86,87,87,87,87,86,86,85,85,84,84,84,84,84,84,84,83,83,83,83,84,84,85,86,86,87,87,87,87,86,86,85,85,85,84,84,84,84,83,83,83,83,83,83,83,84,85,86,86,87,87,87,87,86,86,86,86,86,86,85,85,84,84,83,83,83,82,82,82,83,85,86,88,89,89,89,88,87,86,84,82,81,80,80,80,80,80,79,79,79,79,79,79,80,81,82,83,85,86,86,85,85,84,83,81,81,81,80,80,80,81,80,80,80,80,79,79,80,82,83,84,85,86,86,86,85,85,84,84,83,83,83,82,82,82,82,82,82,82,82,82,83,84,85,85,86,86,null,null,null,null,null],"c":[3,3,3,3,3,3,3,3,3,2,3,3,3,3,3,1,0,3,1,1,3,0,0,0,0,0,0,2,0,2,1,0,0,0,0,0,2,1,3,81,2,82,2,2,51,55,53,51,51,0,0,1,2,51,51,3,3,2,1,0,3,0,0,0,0,0,0,51,51,53,53,51,51,0,1,51,51,51,51,51,51,51,51,51,51,0,1,1,2,3,3,3,3,51,51,51,51,3,3,3,3,2,3,3,3,3,3,3,3,3,3,3,3,51,3,3,3,3,3,3,3,3,2,1,1,1,1,2,3,3,3,3,3,51,51,51,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,51,51,51,3,3,3,53,53,53,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,95,95,80,55,55,55,51,51,51,53,53,53,2,3,3,51,51,51,3,3,3,3,3,3,51,51,51,51,51,51,51,51,51,3,3,3,51,51,51,51,51,51,51,51,51,51,95,95,95,95,95,51,51,51,51,51,51,2,3,3,3,2,2,2,3,3,51,51,51,51,51,51,51,51,51,51,51,51,3,3,3,3,3,3,51,51,51,3,3,3,51,51,51,51,51,51,51,51,51,3,3,3,3,3,3,3,3,3,3,3,3,51,51,51,51,51,51,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,51,51,51,95,95,95,51,51,51,51,51,51,55,55,55,55,55,55,3,3,3,55,95,95,95,95,55,53,53,53,53,53,53,1,0,0,51,51,51,0,0,0,51,51,51,0,0,0,51,51,51,53,53,53,51,51,51,53,53,53,0,0,0,0,0,0,0,0,0,0,0,0,null,null,null,null,null]},"Los Angeles":{"start":1790208000,"t":[78,74,71,70,69,69,69,69,67,66,65,64,63,64,65,65,66,70,73,78,82,84,82,79,75,72,69,68,68,67,66,65,65,65,65,65,65,65,64,65,69,74,80,86,88,90,90,88,86,82,80,80,79,79,79,78,77,77,76,76,76,75,75,76,78,81,84,87,90,91,90,87,86,85,83,81,79,78,77,77,76,76,75,74,74,74,73,74,76,79,81,85,87,88,86,84,82,79,78,77,77,76,75,74,74,73,73,72,72,72,72,73,75,78,81,83,86,87,86,83,81,80,79,79,78,77,77,77,76,76,76,76,77,77,78,79,82,86,89,92,95,96,94,91,88,87,86,85,84,83,82,82,81,81,80,80,79,79,78,78,80,82,84,85,86,86,84,82,81,79,77,76,76,75,75,75,75,75,74,74,73,73,73,73,76,79,81,83,85,86,85,83,81,79,78,76,76,75,75,74,74,73,73,72,72,72,72,73,74,77,80,83,85,87,85,83,80,78,75,74,74,74,74,73,72,71,70,70,69,69,69,69,71,74,77,79,81,83,83,83,82,80,77,75,74,74,73,73,73,73,72,72,72,73,73,75,77,81,84,86,89,90,90,89,87,86,85,84,82,81,80,79,79,79,78,77,77,77,77,78,80,83,86,89,91,92,91,88,86,85,84,83,82,81,80,79,78,78,77,76,75,75,75,75,77,80,83,85,87,88,86,83,81,79,78,77,76,76,76,75,74,73,72,72,71,71,71,72,74,77,80,82,84,85,84,82,80,79,78,78,78,78,78,78,78,78,78,78,78,78,78,79,82,86,89,92,95,97,97,95,93,92,91,90,89,89,88,88,86,86,85,84,83,83,83,84,87,91,94,null,null,null,null,null],"c":[0,0,0,1,1,2,3,2,1,0,0,0,1,3,45,45,45,3,1,0,0,0,0,0,0,1,1,0,0,0,0,0,1,45,45,45,45,45,45,45,45,3,3,0,0,0,3,3,1,1,3,3,1,2,1,2,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,2,1,1,1,1,1,1,0,0,1,2,2,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,3,3,3,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,null,null,null,null,null]},"London":{"start":1790208000,"t":[59,59,58,58,57,57,56,57,58,60,62,65,68,70,72,72,72,72,70,68,65,64,62,62,62,61,61,60,59,60,60,61,63,65,67,69,71,73,75,76,76,74,72,71,68,64,63,62,61,60,60,59,58,57,56,56,57,57,59,61,63,64,65,66,66,66,66,66,66,66,65,63,62,61,60,60,60,60,60,61,62,64,66,69,71,73,73,73,72,71,69,68,67,66,65,63,62,61,60,59,58,57,57,57,57,57,59,62,64,66,67,68,67,66,64,63,62,61,61,61,62,63,63,63,63,63,64,64,65,66,71,73,75,76,77,77,78,78,78,77,75,74,72,70,69,68,68,67,67,67,67,67,68,69,70,72,73,74,73,71,70,68,67,67,66,66,66,65,65,65,64,63,63,62,62,62,62,62,62,61,61,61,61,61,61,61,60,60,60,60,59,59,58,58,57,56,55,54,54,55,57,59,61,63,64,64,63,62,60,59,58,57,56,55,54,53,52,51,51,50,49,49,49,50,52,55,57,59,60,61,60,60,59,58,57,56,55,54,52,51,51,50,49,48,48,47,48,49,51,54,57,59,60,61,61,60,60,59,58,58,57,57,56,56,56,56,56,56,56,57,57,59,60,62,63,65,65,65,65,64,63,62,61,60,59,57,56,55,55,54,53,53,53,53,54,55,57,60,62,65,66,66,66,65,65,64,63,63,63,62,62,62,61,61,61,60,60,60,61,62,63,65,67,69,69,69,69,68,66,65,65,64,64,64,64,63,63,63,63,62,62,62,61,61,60,60,59,58,58,58,58,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"c":[3,2,2,3,3,3,3,1,0,0,0,0,0,3,0,0,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,2,3,3,3,3,3,3,3,3,3,3,3,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,1,1,0,0,0,1,2,3,51,51,51,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,53,53,53,51,51,51,2,2,1,1,2,2,1,0,0,3,3,3,3,3,3,3,3,3,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,2,1,1,0,0,0,0,0,1,1,1,2,2,2,3,3,3,3,53,53,53,53,53,53,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,1,1,0,0,0,0,53,53,53,53,53,53,2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,51,51,51,51,51,51,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,3,3,3,3,3,3,3,2,2,2,2,2,2,2,3,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,55,55,55,55,55,55,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Tokyo":{"start":1790208000,"t":[73,75,77,80,82,83,83,81,79,78,76,75,75,74,73,73,72,72,71,71,70,70,71,73,74,76,77,78,79,79,78,78,76,75,74,73,72,72,71,71,70,70,69,68,68,67,67,67,66,66,66,66,65,67,67,67,67,66,66,66,66,66,65,65,65,65,65,65,65,65,66,68,69,70,69,69,69,71,73,72,71,70,69,69,69,69,68,68,68,67,67,66,65,65,67,71,73,75,75,76,76,75,75,74,73,72,71,70,70,69,69,69,69,69,69,69,68,68,70,73,75,77,78,79,79,79,78,77,75,74,72,71,69,69,68,67,67,67,67,67,68,69,70,71,72,73,74,75,76,77,77,78,77,77,77,76,76,75,73,72,71,70,69,70,71,72,73,75,76,76,76,76,76,75,75,74,73,72,71,70,69,69,68,67,67,67,66,66,66,66,66,67,67,68,69,70,71,71,71,71,70,69,68,67,66,65,65,65,65,65,65,64,64,64,64,64,64,64,65,65,66,66,66,66,66,65,64,64,63,63,62,62,62,62,62,62,62,63,64,65,65,66,68,69,70,71,72,72,71,71,70,69,68,68,67,66,65,65,65,65,66,67,68,69,70,72,74,76,77,78,78,78,76,74,72,70,68,67,67,66,66,66,66,66,66,67,68,69,69,70,71,71,72,72,72,71,70,68,67,66,65,64,64,63,63,63,63,63,64,64,65,66,66,67,68,69,70,70,70,70,68,66,65,63,62,61,60,59,58,58,58,59,59,60,62,63,64,65,67,68,69,70,71,70,70,68,67,66,65,64,64,63,63,63,62,62,62,62,62,62,63,65,67,68,69,69,69,68,67,66,66,65,65,65,64,64,64,64,64,null,null,null,null,null],"c":[1,1,1,0,0,0,0,0,0,0,0,0,2,2,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,51,51,51,51,63,63,61,61,61,53,51,3,2,3,3,3,3,2,2,2,2,2,3,1,3,3,3,3,51,51,3,3,3,51,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,53,53,53,53,53,53,3,3,3,3,3,3,51,51,51,3,3,3,51,51,51,51,51,51,51,51,51,2,2,1,1,1,1,1,2,2,3,3,3,51,51,51,51,51,51,51,51,51,51,51,51,2,2,2,2,2,2,2,3,3,3,3,3,2,2,2,2,2,2,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,2,2,3,3,3,3,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,51,81,81,81,81,81,81,3,3,3,3,3,3,51,51,51,51,51,51,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,3,3,3,3,3,3,3,3,2,2,2,2,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,null,null,null,null,null]}};
 const soloPick = list => list[Math.floor(Math.random() * list.length)];
+// Built-in mood matcher, used when the AI isn't connected. A topic matches if the text has any `words`
+// (and, if given, any `also` words too). Idea rows: [emoji, title, description, cost, duration, tags].
+const SOLO_TOPICS = [
+  { words: ['sad', 'cry', 'lonely', 'heartbr', 'tear', 'down', 'blue', 'miss'], also: ['movie', 'film', 'watch', 'netflix'], ideas: [
+    ['🌙', 'Past Lives', 'Two childhood sweethearts. Twenty-four years. One impossible what-if.', '$', '1h 45m', ['movie', 'tearjerker', '2023']],
+    ['🎈', 'Up', 'A widower, a stowaway and ten thousand balloons. You\'ll cry by minute ten.', '$', '1h 36m', ['movie', 'animated', '2009']],
+    ['🐕', 'Marley & Me', 'The worst dog in the world. The best life. Bring tissues.', '$', '2h', ['movie', 'tearjerker', '2008']],
+    ['🧠', 'Eternal Sunshine of the Spotless Mind', 'They erased each other. Their hearts never got the memo.', '$', '1h 48m', ['movie', 'romance', '2004']],
+    ['🌧️', 'The Notebook', 'One summer, one rainstorm, one love that refuses to quit.', '$', '2h 3m', ['movie', 'romance', '2004']],
+    ['🌊', 'Aftersun', 'A holiday with Dad, understood twenty years too late.', '$', '1h 42m', ['movie', 'tearjerker', '2022']],
+    ['🎸', 'Coco', 'A boy, a guitar, and the family waiting on the other side.', '$', '1h 45m', ['movie', 'animated', '2017']],
+    ['✒️', 'Little Women', 'Four sisters, one house, a lifetime of growing up and apart.', '$', '2h 15m', ['movie', 'drama', '2019']],
+  ] },
+  { words: ['movie', 'film', 'watch', 'netflix', 'show'], ideas: [
+    ['🐻', 'Paddington 2', 'A bear goes to prison and somehow makes it the kindest place on earth.', '$', '1h 44m', ['movie', 'comfort', '2017']],
+    ['🗡️', 'The Princess Bride', 'Fencing. Giants. True love. Miracles. As you wish.', '$', '1h 38m', ['movie', 'classic', '1987']],
+    ['🔪', 'Knives Out', 'A dead novelist, a greedy family, and a detective with a drawl.', '$', '2h 10m', ['movie', 'mystery', '2019']],
+    ['🐉', 'Spirited Away', 'A lost girl, a bathhouse for spirits, and a name she must not forget.', '$', '2h 5m', ['movie', 'animated', '2001']],
+    ['🍿', 'Build a movie-night nest', 'Blankets, pillows, popcorn, lights off. Pick a movie you loved as a kid.', 'free', '2h', ['cozy', 'night in']],
+  ] },
+  { words: ['lonely', 'alone', 'isolated', 'miss', 'nobody', 'no one'], ideas: [
+    ['📞', 'Call someone you miss', 'Pick one person you haven\'t talked to in months and just call. They\'ll be glad you did.', 'free', '30m', ['connection']],
+    ['☕', 'Bring a book to a busy café', 'Being around people helps, even if you don\'t talk to anyone.', '$', '1h', ['cozy', 'out']],
+    ['🧠', 'Go to a trivia night alone', 'Teams love an extra player. Ask to join one; it\'s an easy way to meet people.', '$', '2h', ['social']],
+    ['💌', 'Write a letter to a friend', 'A real paper letter. It feels good to write and even better to get.', 'free', '30m', ['connection']],
+    ['🐶', 'Volunteer at an animal shelter', 'Many shelters have evening shifts. Dogs are excellent company.', 'free', '2h', ['kind']],
+  ] },
+  { words: ['sad', 'cry', 'down', 'blue', 'upset', 'heartbr', 'bad day'], ideas: [
+    ['🛁', 'Take a long, hot bath', 'Music on, phone away. Let yourself do nothing for a while.', 'free', '45m', ['self-care']],
+    ['🍝', 'Make your favorite comfort food', 'Whatever makes you feel looked after. Extra cheese allowed.', '$', '1h', ['comfort']],
+    ['🎧', 'Make a "cry it out" playlist', 'Sad songs, then slowly switch to happy ones. It really helps.', 'free', '30m', ['music']],
+    ['🚶', 'Take a slow walk outside', 'Fresh air and moving your body shift your mood more than you\'d think.', 'free', '30m', ['outdoors']],
+  ] },
+  { words: ['happy', 'great', 'excited', 'good', 'celebrat', 'amazing'], ideas: [
+    ['💃', 'Throw a solo dance party', 'Loud music, kitchen floor, no one watching. Go wild.', 'free', '30m', ['energy']],
+    ['🎤', 'Go to karaoke', 'Pick the song you secretly know every word to.', '$', '2h', ['social', 'fun']],
+    ['🍦', 'Go on a dessert crawl', 'Three dessert spots, one bite each. Rate them.', '$$', '2h', ['food']],
+    ['🌅', 'Have a sunset picnic', 'Grab snacks and a blanket and find a view.', '$', '1.5h', ['outdoors']],
+  ] },
+  { words: ['tired', 'sleepy', 'exhausted', 'lazy', 'drained', 'chill', 'relax'], ideas: [
+    ['🧖', 'Do a face mask and a show', 'Minimum effort, maximum comfort.', '$', '1h', ['self-care']],
+    ['📚', 'Read in bed and sleep early', 'Tomorrow-you will be so grateful.', 'free', '1h', ['rest']],
+    ['🥡', 'Order your favorite takeout', 'No cooking, no dishes. You earned it.', '$$', '1h', ['food', 'cozy']],
+  ] },
+  { words: ['social', 'friends', 'people', 'party', 'meet', 'hang', 'group'], ideas: [
+    ['🎲', 'Host a board game night', 'Text three friends, grab snacks, pick a game everyone knows.', '$', '3h', ['friends']],
+    ['🎳', 'Go bowling', 'Cheesy shoes, loud music, bad scores. Always fun.', '$$', '2h', ['friends', 'active']],
+    ['🧠', 'Find a trivia night', 'Bars all over town have trivia on weeknights. Name your team something ridiculous.', '$', '2h', ['social']],
+  ] },
+  { words: ['wired', 'energy', 'energetic', 'restless', 'hyper', 'active', 'bored'], ideas: [
+    ['🧗', 'Try a climbing gym', 'Most have day passes and rental shoes. You\'ll be tired in the best way.', '$$', '2h', ['active']],
+    ['🕹️', 'Hit an arcade', 'Skee-ball, air hockey, claw machines. Burn it all off.', '$', '2h', ['fun']],
+    ['🏃', 'Go for a night run', 'City lights, cool air, your favorite playlist.', 'free', '45m', ['active']],
+  ] },
+  { words: ['broke', 'cheap', 'free', 'money', 'budget', 'poor'], ideas: [
+    ['🏛️', 'Find a free museum night', 'Lots of museums have a free evening each week. Look up yours.', 'free', '2h', ['culture']],
+    ['🍲', 'Host a potluck', 'Everyone brings one dish. A feast for the price of one meal.', '$', '3h', ['friends', 'food']],
+    ['📚', 'Explore the library', 'Free books, movies, and sometimes free events and classes.', 'free', '1h', ['quiet']],
+  ] },
+  { words: ['adventur', 'new', 'different', 'spontan', 'explore', 'wild'], ideas: [
+    ['🗺️', 'Explore a new neighborhood', 'Pick one you\'ve never walked around. Eat at the first place that smells good.', '$', '2h', ['explore']],
+    ['🎙️', 'Go to an open mic', 'Watch, or sign up if you\'re brave. Either way it\'s a story.', 'free', '2h', ['culture']],
+    ['🌮', 'Try a cuisine you\'ve never had', 'Point at the menu and trust the process.', '$$', '1.5h', ['food']],
+  ] },
+  { words: ['romantic', 'date', 'love', 'crush', 'partner', 'boyfriend', 'girlfriend'], ideas: [
+    ['✨', 'Go stargazing', 'Drive away from the city lights with a blanket and hot drinks.', 'free', '2h', ['romantic']],
+    ['🕯️', 'Cook a candlelit dinner at home', 'Cook something together, dim the lights, play music.', '$', '2h', ['romantic']],
+    ['🍰', 'Do a dessert date', 'Skip dinner and just split three desserts.', '$$', '1.5h', ['romantic', 'food']],
+  ] },
+  { words: ['cozy', 'comfy', 'home', 'stay in', 'cold', 'rain'], ideas: [
+    ['🏰', 'Build a blanket fort', 'Fairy lights, pillows, snacks. You are never too old.', 'free', '1h', ['cozy']],
+    ['🍪', 'Bake cookies', 'The house smells amazing, and then you have cookies.', '$', '1h', ['cozy', 'food']],
+    ['🧩', 'Do a puzzle with hot cocoa', 'Slow, calm, and very satisfying.', '$', '2h', ['cozy']],
+  ] },
+  { words: ['stress', 'anxious', 'anxiety', 'overwhelm', 'worried', 'nervous'], ideas: [
+    ['🧘', 'Try a 20-minute yoga video', 'Free on YouTube. Slow breathing, gentle stretches.', 'free', '20m', ['calm']],
+    ['📝', 'Brain-dump in a journal', 'Write down everything on your mind. Then close the notebook.', 'free', '20m', ['calm']],
+    ['🌳', 'Walk somewhere green', 'A park, a tree-lined street, anywhere with nature.', 'free', '30m', ['outdoors', 'calm']],
+  ] },
+];
+const soloMatch = text => {
+  const t = text.toLowerCase(), has = list => list.filter(w => t.includes(w)).length;
+  return SOLO_TOPICS.map(topic => ({ topic, score: has(topic.words) * (topic.also ? (has(topic.also) ? 3 : 0) : 1) }))
+    .filter(x => x.score > 0).sort((a, b) => b.score - a.score)
+    .flatMap(x => x.topic.ideas).filter((i, n, all) => all.findIndex(j => j[1] === i[1]) === n).slice(0, 9)
+    .map(([emoji, title, description, cost, duration, tags]) => ({ emoji, title, description, cost, duration, tags, vibe: tags[0], mode: 'solo' }));
+};
 const SOLO_MOODS = [['😄', 'happy'], ['😢', 'sad'], ['😴', 'tired'], ['🥳', 'social'], ['⚡', 'wired'], ['💸', 'broke'],
   ['🧭', 'adventurous'], ['💕', 'romantic'], ['🛋️', 'cozy'], ['😤', 'stressed']];
 
@@ -70,6 +159,31 @@ soloStyle.textContent = `
   .solo-mood .chip { font-size: 14px; padding: 6px 14px; }
   .solo-mood .chip:hover { border-color: var(--accent2); }
   .solo-for { color: var(--mute); margin: 18px 0 0; }
+  .solo-wheel { position: relative; height: 600px; perspective: 1400px; overflow: hidden; touch-action: pan-y; user-select: none; margin-top: 6px; }
+  .solo-card { position: absolute; left: 50%; top: 14px; width: 340px; background: #14152c; border: 1px solid var(--line); border-radius: 22px;
+    overflow: hidden; box-shadow: 0 30px 70px #0009; cursor: pointer; transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .45s, filter .45s; }
+  .solo-card:not(.on) { filter: brightness(.6); }
+  .solo-card.on { cursor: grab; border-color: #ffffff2a; }
+  .solo-poster { height: 240px; display: grid; place-items: center; font-size: 104px; position: relative; }
+  .solo-poster::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 50%, #14152c); }
+  .solo-poster span { filter: drop-shadow(0 12px 24px #0007); z-index: 1; }
+  .solo-cbody { padding: 0 28px 26px; position: relative; }
+  .solo-kicker { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--mute); margin-bottom: 10px; }
+  .solo-ctitle { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: 36px; line-height: 1.05; margin: 0 0 12px; font-weight: 600; letter-spacing: -.01em; }
+  .solo-cdesc { font-family: Georgia, serif; font-style: italic; font-size: 17px; line-height: 1.5; color: #d9d6f2; margin: 0 0 16px; }
+  .solo-meta { font-size: 13px; color: var(--mute); margin-bottom: 20px; letter-spacing: .04em; }
+  .solo-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .solo-actions a, .solo-actions button { font: inherit; font-size: 14px; font-weight: 700; padding: 9px 16px; border-radius: 999px; cursor: pointer; text-decoration: none; }
+  .solo-watch { background: var(--ink); color: var(--bg); border: 0; }
+  .solo-love { background: transparent; color: var(--ink); border: 1px solid #ffffff40; }
+  .solo-love:hover { border-color: var(--accent); }
+  .solo-arrow { position: absolute; top: 45%; z-index: 30; width: 48px; height: 48px; border-radius: 50%; background: #0f1024cc; border: 1px solid var(--line);
+    color: var(--ink); font-size: 26px; line-height: 1; cursor: pointer; backdrop-filter: blur(6px); }
+  .solo-arrow:hover { border-color: var(--accent2); } .solo-prev { left: 10px; } .solo-next { right: 10px; }
+  .solo-dots { display: flex; justify-content: center; gap: 8px; }
+  .solo-dots button { width: 8px; height: 8px; border-radius: 4px; border: 0; padding: 0; background: var(--line); cursor: pointer; transition: all .3s; }
+  .solo-dots button.on { width: 24px; background: var(--accent); }
+  .solo-hint { text-align: center; color: var(--mute); font-size: 13px; margin-top: 10px; }
   .solo-pop { animation: solo-pop .35s ease; }
   @keyframes solo-pop { 0% { transform: scale(.94); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }`;
 document.head.appendChild(soloStyle);
@@ -86,7 +200,7 @@ registerFeature({
       </div>
       <div class="row"><button class="btn ghost" id="go">Just give me ideas</button><button class="btn ghost" id="wild">🎲 Surprise me</button></div>
       <p class="solo-for" id="for"></p>
-      <div id="out" class="grid"></div>
+      <div id="out"></div>
       <div class="solo-fun"><h2>🎉 While you decide…</h2><div class="solo-fun-grid">
         <div class="card clicky" id="joke" title="Click for another joke"></div>
         <div class="card clicky" id="word" title="Click for another word"></div>
@@ -119,7 +233,16 @@ registerFeature({
         const t = Math.round(wx.current.temperature_2m), c = wx.current.weather_code, [emoji, words] = soloWeather(c);
         refresh(weather, `<div class="label">${emoji} Weather in ${ui.esc(place.name)}</div><div class="temp">${t}°F</div>
           <div class="body">${words}</div><div class="muted">${soloWeatherTip(t, c)}</div>${more('city')}`);
-      } catch { refresh(weather, `<div class="label">🌤️ Weather in ${ui.esc(city)}</div><div class="body">Couldn't reach the weather. Look out the window? 🪟</div>${more('city')}`); }
+      } catch {
+        // Live weather blocked: read this hour from the stored forecast.
+        const name = Object.keys(SOLO_FORECAST).find(k => city.toLowerCase().includes(k.toLowerCase()));
+        const fc = SOLO_FORECAST[name], h =fc && Math.floor((Date.now() / 1000 - fc.start) / 3600);
+        if (fc && h >= 0 && fc.t[h] != null) {
+          const t = fc.t[h], c = fc.c[h], [emoji, words] = soloWeather(c);
+          refresh(weather, `<div class="label">${emoji} Weather in ${ui.esc(city)}</div><div class="temp">${t}°F</div>
+            <div class="body">${words}</div><div class="muted">${soloWeatherTip(t, c)}</div>${more('city')}`);
+        } else refresh(weather, `<div class="label">🌤️ Weather in ${ui.esc(city)}</div><div class="body">No forecast for this city yet. Look out the window? 🪟</div>${more('city')}`);
+      }
     };
     joke.onclick = showJoke; fact.onclick = showFact; word.onclick = showWord; weather.onclick = showWeather;
     showJoke(); showFact(); showWord(); showWeather();
@@ -132,11 +255,76 @@ registerFeature({
       try {
         const context = wild ? { wildcard: 'Suggest something unexpected and out of their usual comfort zone' } : {};
         if (mood) context.mood = mood;
-        const { ideas, source } = await app.suggest('solo', context, wild ? 3 : 5);
-        out.innerHTML = ''; if (source === 'fallback') ui.toast('Using built-in ideas (no Claude key set)');
-        ideas.forEach(i => out.appendChild(ui.ideaCard(i, [{ label: '💾 Save', onClick: () => save(i) }])));
+        let { ideas, source } = await app.suggest('solo', context, wild ? 3 : 5);
+        // No AI connected: use our own mood matcher so typed moods still get matching ideas.
+        const matched = source === 'fallback' && mood && !wild ? soloMatch(mood) : [];
+        if (matched.length) ideas = matched;
+        else if (source === 'fallback' && mood) ui.toast("Hmm, I didn't catch that mood. Here are some general ideas!");
+        out.innerHTML = '';
+        forLine.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showWheel(ideas);
       } catch (e) { out.innerHTML = `<div class="card">${ui.esc(e.message)}</div>`; }
     };
+    // Card wheel: one big card in front, neighbours angled behind. Swipe, drag, arrows, dots or ← → keys; loops around.
+    let go = null;
+    const showWheel = ideas => {
+      const isMovie = i => (i.tags || []).some(t => /movie|film/i.test(t));
+      out.innerHTML = `<div class="solo-wheel">${ideas.map(i => {
+        const title = String(i.title || '').replace(/^watch\s+/i, '').replace(/^"(.*)"$/, '$1');
+        const hue = [...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 17);
+        const watch = isMovie(i) ? `<a class="solo-watch" target="_blank" rel="noopener" href="https://www.justwatch.com/us/search?q=${encodeURIComponent(title)}">▶ Where to watch</a>` : '';
+        return `<article class="solo-card">
+          <div class="solo-poster" style="background: radial-gradient(circle at 30% 20%, hsl(${hue} 80% 62%), hsl(${(hue + 50) % 360} 60% 30%) 60%, #14152c)"><span>${ui.esc(i.emoji || '✨')}</span></div>
+          <div class="solo-cbody"><div class="solo-kicker">${ui.esc((i.tags || []).join(' · '))}</div>
+            <h3 class="solo-ctitle">${ui.esc(title)}</h3><p class="solo-cdesc">${ui.esc(i.description || '')}</p>
+            <div class="solo-meta">${ui.esc([i.duration, i.cost].filter(Boolean).join('  ·  '))}</div>
+            <div class="solo-actions">${watch}<button class="solo-love" type="button">Love it 💾</button></div></div></article>`;
+      }).join('')}<button class="solo-arrow solo-prev" type="button" aria-label="Previous">‹</button><button class="solo-arrow solo-next" type="button" aria-label="Next">›</button></div>
+        <div class="solo-dots">${ideas.map(() => '<button type="button"></button>').join('')}</div>
+        <div class="solo-hint">Swipe, drag or use ← → to browse</div>`;
+      const wheelEl = out.querySelector('.solo-wheel'), cards = [...out.querySelectorAll('.solo-card')], dots = [...out.querySelectorAll('.solo-dots button')], n = cards.length;
+      let cur = 0;
+      go = k => {
+        cur = (k + n) % n;
+        cards.forEach((c, i) => {
+          let d = i - cur; if (d > n / 2) d -= n; if (d < -n / 2) d += n;
+          const a = Math.abs(d);
+          c.style.transform = `translateX(calc(-50% + ${d * 64}%)) rotateY(${-d * 30}deg) scale(${1 - a * 0.14})`;
+          c.style.zIndex = 20 - a; c.style.opacity = a > 2 ? 0 : 1 - a * 0.2; c.style.pointerEvents = a > 2 ? 'none' : 'auto';
+          c.classList.toggle('on', d === 0);
+        });
+        dots.forEach((b, i) => b.classList.toggle('on', i === cur));
+      };
+      let startX = null, dragged = false;
+      cards.forEach((c, i) => {
+        c.onclick = e => { if (dragged || i === cur) return; e.preventDefault(); go(i); };
+        c.querySelector('.solo-love').onclick = e => {
+          if (i !== cur) return; e.stopPropagation(); save(ideas[i]);
+          e.target.textContent = 'Loved ✓'; e.target.disabled = true;
+        };
+      });
+      dots.forEach((b, i) => b.onclick = () => go(i));
+      out.querySelector('.solo-prev').onclick = () => go(cur - 1);
+      out.querySelector('.solo-next').onclick = () => go(cur + 1);
+      wheelEl.onpointerdown = e => { startX = e.clientX; dragged = false; };
+      wheelEl.onpointerup = e => {
+        if (startX === null) return; const dx = e.clientX - startX; startX = null;
+        if (Math.abs(dx) > 40) { dragged = true; go(cur + (dx < 0 ? 1 : -1)); setTimeout(() => dragged = false, 50); }
+      };
+      let lastWheel = 0;
+      wheelEl.onwheel = e => { // trackpad two-finger swipe
+        if (Math.abs(e.deltaX) < Math.abs(e.deltaY) || Math.abs(e.deltaX) < 15) return;
+        e.preventDefault(); if (Date.now() - lastWheel < 450) return;
+        lastWheel = Date.now(); go(cur + (e.deltaX > 0 ? 1 : -1));
+      };
+      go(0);
+    };
+    const keys = e => {
+      if (!go || e.target.matches('input, textarea, select')) return;
+      const cur = [...out.querySelectorAll('.solo-card')].findIndex(c => c.classList.contains('on'));
+      if (e.key === 'ArrowRight') go(cur + 1); if (e.key === 'ArrowLeft') go(cur - 1);
+    };
+    document.addEventListener('keydown', keys);
     const key = 'saved:' + app.user;
     const save = i => { try { const s = JSON.parse(localStorage[key] || '[]'); s.push(i); localStorage[key] = JSON.stringify(s); ui.toast('Saved!'); } catch {} };
     view.querySelector('#moodForm').onsubmit = e => { e.preventDefault(); chips.forEach(c => c.classList.remove('on')); run(false); };
@@ -146,6 +334,6 @@ registerFeature({
     });
     view.querySelector('#go').onclick = () => run(false);
     view.querySelector('#wild').onclick = () => run(true);
-    // TODO (Solo squad): saved-ideas list, swipe/shuffle cards, "not feeling it" regenerate, mood quick-picker.
+    return () => document.removeEventListener('keydown', keys);
   },
 });
