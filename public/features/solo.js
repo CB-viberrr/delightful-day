@@ -49,7 +49,65 @@ const SOLO_FORECAST = {"Boston":{"start":1790208000,"t":[54,53,52,52,51,51,51,51
 const soloPick = list => list[Math.floor(Math.random() * list.length)];
 // Built-in mood matcher, used when the AI isn't connected. A topic matches if the text has any `words`
 // (and, if given, any `also` words too). Idea rows: [emoji, title, description, cost, duration, tags].
-const soloYT = q => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
+// Original poster art (hand-drawn SVG, inspired by each title's most famous image; not the studio artwork).
+const soloSvg = (id, top, bottom, inner) => `<svg viewBox="0 0 340 240" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${top}"/><stop offset="1" stop-color="${bottom}"/></linearGradient></defs>
+  <rect width="340" height="240" fill="url(#${id})"/>${inner}</svg>`;
+const soloDots = (n, seed, f) => Array.from({ length: n }, (_, i) => f((Math.sin(seed + i * 12.9898) * 43758.5453) % 1, (Math.sin(seed + i * 78.233) * 12345.678) % 1, i)).join('');
+const soloAbs = x => Math.abs(x);
+const SOLO_POSTERS = {
+  'Past Lives': soloSvg('pl', '#1b1f4b', '#f3b88b', `<circle cx="252" cy="58" r="18" fill="#fde8c8" opacity=".9"/>
+    <rect y="170" width="340" height="70" fill="#2a1f3d"/><line y1="170" x2="340" y2="170" stroke="#f3b88b" stroke-width="2" opacity=".6"/>
+    <line x1="110" y1="150" x2="230" y2="150" stroke="#fde8c8" stroke-width="2" stroke-dasharray="3 8" opacity=".6"/>
+    <g fill="#140f24"><circle cx="95" cy="126" r="8"/><rect x="87" y="135" width="16" height="35" rx="7"/><circle cx="245" cy="126" r="8"/><rect x="237" y="135" width="16" height="35" rx="7"/></g>`),
+  'Up': soloSvg('up', '#6bbbee', '#dff3ff', `<g fill="#fff" opacity=".85"><ellipse cx="60" cy="190" rx="50" ry="14"/><ellipse cx="290" cy="200" rx="60" ry="16"/><ellipse cx="270" cy="40" rx="40" ry="10"/></g>
+    ${soloDots(18, 3, (a, b, i) => `<line x1="170" y1="168" x2="${170 + a * 80}" y2="${78 + soloAbs(b) * 40}" stroke="#555" stroke-width=".6"/>`)}
+    ${soloDots(18, 3, (a, b, i) => `<circle cx="${170 + a * 80}" cy="${78 + soloAbs(b) * 40}" r="${11 + (i % 3) * 3}" fill="${['#ff5d73', '#ffd166', '#06d6a0', '#118ab2', '#ef476f', '#c77dff', '#ff9f1c'][i % 7]}"/>`)}
+    <rect x="150" y="182" width="40" height="32" fill="#e9c46a"/><polygon points="144,184 170,164 196,184" fill="#c0504d"/><rect x="165" y="196" width="10" height="18" fill="#6d4c41"/><rect x="176" y="188" width="9" height="8" fill="#bde0fe"/>`),
+  'Marley & Me': soloSvg('mm', '#f6d365', '#fda085', `<rect y="190" width="340" height="50" fill="#7cb342"/>
+    <g fill="#5d3a1a" opacity=".85"><ellipse cx="160" cy="130" rx="34" ry="28"/><ellipse cx="118" cy="92" rx="12" ry="16"/><ellipse cx="146" cy="72" rx="12" ry="16"/><ellipse cx="176" cy="72" rx="12" ry="16"/><ellipse cx="204" cy="92" rx="12" ry="16"/></g>
+    <circle cx="262" cy="176" r="20" fill="#d4e157"/><path d="M246 164 q16 12 0 26 M278 164 q-16 12 0 26" stroke="#fff" stroke-width="3" fill="none"/>`),
+  'Eternal Sunshine of the Spotless Mind': soloSvg('es', '#0d1b2a', '#415a77', `${soloDots(30, 7, (a, b) => `<circle cx="${soloAbs(a) * 340}" cy="${soloAbs(b) * 110}" r="1.2" fill="#fff" opacity=".7"/>`)}
+    <ellipse cx="170" cy="200" rx="240" ry="70" fill="#cfe3f0" opacity=".92"/>
+    <path d="M40 190 l40 10 l30 -8 M200 215 l30 -12 l40 6 M120 225 l20 -10" stroke="#8fb3cc" stroke-width="1.5" fill="none"/>
+    <g><rect x="130" y="176" width="36" height="10" rx="5" fill="#2b2d42"/><circle cx="126" cy="181" r="6" fill="#ff7b39"/><rect x="172" y="176" width="36" height="10" rx="5" fill="#3d405b"/><circle cx="212" cy="181" r="6" fill="#2b2d42"/></g>`),
+  'The Notebook': soloSvg('nb', '#4a5d6e', '#9fb3c2', `<rect y="165" width="340" height="75" fill="#3b4f5f"/>
+    ${soloDots(60, 11, (a, b) => `<line x1="${soloAbs(a) * 360}" y1="${soloAbs(b) * 240}" x2="${soloAbs(a) * 360 - 6}" y2="${soloAbs(b) * 240 + 16}" stroke="#dfe7ee" stroke-width="1" opacity=".45"/>`)}
+    <path d="M130 172 q40 18 80 0 l-8 12 q-32 10 -64 0 z" fill="#6d4c41"/><circle cx="160" cy="162" r="5" fill="#222"/><circle cx="182" cy="162" r="5" fill="#222"/>
+    <path d="M60 80 l8 6 l8 -6 M90 60 l7 5 l7 -5 M250 70 l8 6 l8 -6 M280 95 l6 5 l6 -5" stroke="#fff" stroke-width="2" fill="none"/>`),
+  'Aftersun': soloSvg('as', '#00a8b5', '#7fe3e0', `<circle cx="270" cy="50" r="40" fill="#ffe08a" opacity=".35"/><circle cx="270" cy="50" r="22" fill="#ffe08a"/>
+    ${[120, 150, 180, 210].map(y => `<path d="M0 ${y} q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#fff" stroke-width="2" fill="none" opacity=".5"/>`).join('')}
+    <g transform="rotate(-8 120 110)"><rect x="80" y="60" width="84" height="100" fill="#fff"/><rect x="88" y="68" width="68" height="68" fill="#2a9d8f"/><circle cx="122" cy="96" r="12" fill="#ffe08a"/></g>`),
+  'Coco': soloSvg('co', '#1a0b3b', '#6a1b6e', `${soloDots(40, 5, (a, b, i) => `<circle cx="${soloAbs(a) * 340}" cy="${soloAbs(b) * 240}" r="${3 + (i % 3)}" fill="${i % 2 ? '#ff9f1c' : '#ffbf00'}" opacity=".9"/>`)}
+    <g transform="rotate(-20 170 130)"><rect x="164" y="30" width="12" height="90" fill="#8d5524"/><rect x="160" y="20" width="20" height="16" rx="3" fill="#5d3a1a"/>
+    <circle cx="170" cy="140" r="26" fill="#f5f0e6"/><circle cx="170" cy="180" r="32" fill="#f5f0e6"/><circle cx="170" cy="160" r="9" fill="#1a0b3b"/></g>`),
+  'Little Women': soloSvg('lw', '#efe3d0', '#d8c3a5', `<rect y="200" width="340" height="40" fill="#c9b18f"/>
+    ${['#7b4b3a', '#a0522d', '#5b6c5d', '#8e6c88'].map((c, i) => `<circle cx="${95 + i * 50}" cy="120" r="10" fill="${c}"/><polygon points="${95 + i * 50},130 ${75 + i * 50},200 ${115 + i * 50},200" fill="${c}"/>`).join('')}
+    <path d="M280 40 q-30 40 -40 90 l4 2 q20 -50 36 -92" fill="#5b4636"/>`),
+  'Paddington 2': soloSvg('pd', '#1f4e8c', '#4f86c6', `<ellipse cx="160" cy="130" rx="90" ry="20" fill="#d62828"/><path d="M110 130 q0 -70 50 -70 q50 0 50 70 z" fill="#d62828"/><rect x="112" y="112" width="96" height="10" fill="#9d0208"/>
+    <rect x="240" y="150" width="46" height="56" rx="6" fill="#f4a261"/><rect x="236" y="140" width="54" height="14" rx="3" fill="#e9c46a"/><rect x="246" y="168" width="34" height="20" fill="#fff" opacity=".85"/>`),
+  'The Princess Bride': soloSvg('pb', '#f8b195', '#6c5b7b', `<path d="M0 240 V190 h40 v-30 h14 v14 h14 v-14 h14 v30 h60 v-60 h14 v14 h14 v-14 h14 v60 h40 v-40 h14 v14 h14 v-14 h14 v40 h60 v50 z" fill="#2d1b3d"/>
+    <g stroke="#e0e0e0" stroke-width="4" stroke-linecap="round"><line x1="120" y1="50" x2="220" y2="140"/><line x1="220" y1="50" x2="120" y2="140"/></g>
+    <g stroke="#c9a227" stroke-width="6" stroke-linecap="round"><line x1="200" y1="128" x2="222" y2="116"/><line x1="140" y1="128" x2="118" y2="116"/></g>`),
+  'Knives Out': soloSvg('ko', '#111', '#2b2b2b', `${Array.from({ length: 18 }, (_, i) => `<polygon points="166,30 174,30 170,82" fill="#cfd8dc" transform="rotate(${i * 20} 170 120)"/>`).join('')}
+    <circle cx="170" cy="120" r="26" fill="none" stroke="#c9a227" stroke-width="5"/><circle cx="170" cy="120" r="8" fill="#8b0000"/>`),
+  'Spirited Away': soloSvg('sa', '#0b3d4a', '#1c7c8c', `<rect y="170" width="340" height="70" fill="#0e5563"/>
+    <rect x="120" y="100" width="100" height="70" fill="#b5332e"/><polygon points="108,104 170,70 232,104" fill="#5b1a17"/><rect x="140" y="60" width="60" height="20" fill="#b5332e"/><polygon points="132,62 170,40 208,62" fill="#5b1a17"/>
+    ${soloDots(10, 2, (a, b, i) => `<circle cx="${130 + i * 9}" cy="${120 + (i % 2) * 22}" r="3" fill="#ffd166"/>`)}
+    <g fill="#1d3557"><rect x="20" y="176" width="26" height="12" rx="2"/><rect x="50" y="176" width="26" height="12" rx="2"/><rect x="80" y="176" width="26" height="12" rx="2"/></g>
+    <rect x="120" y="175" width="100" height="40" fill="#b5332e" opacity=".25"/>`),
+  'Friends': soloSvg('fr', '#5b3a8e', '#3d2466', `<ellipse cx="170" cy="100" rx="70" ry="56" fill="none" stroke="#f2c14e" stroke-width="16"/>
+    <ellipse cx="170" cy="100" rx="52" ry="40" fill="#2a1a4a"/><rect x="80" y="180" width="180" height="40" rx="14" fill="#d9713c"/><rect x="70" y="170" width="30" height="50" rx="12" fill="#c45f2c"/><rect x="240" y="170" width="30" height="50" rx="12" fill="#c45f2c"/>`),
+  'The Office': soloSvg('of', '#d9dde3', '#aeb6bf', `<rect y="190" width="340" height="50" fill="#8d6e63"/>
+    <rect x="110" y="110" width="120" height="80" rx="10" fill="#f7e463" opacity=".75"/><rect x="140" y="140" width="60" height="16" rx="4" fill="#37474f"/><rect x="140" y="134" width="56" height="8" rx="3" fill="#546e7a"/>
+    <rect x="252" y="150" width="34" height="40" rx="4" fill="#fff"/><path d="M286 158 q14 0 14 12 q0 12 -14 12" stroke="#fff" stroke-width="5" fill="none"/>`),
+  'Gilmore Girls': soloSvg('gg', '#f4a261', '#9c3d1c', `${soloDots(22, 9, (a, b, i) => `<ellipse cx="${soloAbs(a) * 340}" cy="${soloAbs(b) * 200}" rx="7" ry="4" fill="${['#e76f51', '#ffb703', '#bc4749'][i % 3]}" transform="rotate(${i * 37} ${soloAbs(a) * 340} ${soloAbs(b) * 200})"/>`)}
+    <polygon points="110,110 160,110 152,200 118,200" fill="#fff"/><rect x="112" y="140" width="46" height="20" fill="#6d4c41"/>
+    <polygon points="180,110 230,110 222,200 188,200" fill="#fff"/><rect x="182" y="140" width="46" height="20" fill="#6d4c41"/>`),
+  'Avatar: The Last Airbender': soloSvg('av', '#0f2027', '#2c5364', `<circle cx="170" cy="50" r="24" fill="#f1e3a0"/><circle cx="110" cy="115" r="24" fill="#2a9d8f"/><circle cx="230" cy="115" r="24" fill="#e63946"/><circle cx="170" cy="180" r="24" fill="#6a994e"/>
+    <path d="M170 90 l16 24 h-9 v22 h-14 v-22 h-9 z" fill="#4cc9f0"/>`),
+};
+const soloYT = q =>'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
 const soloGoogle = q => 'https://www.google.com/search?q=' + encodeURIComponent(q);
 const soloMaps = q => 'https://www.google.com/maps/search/' + encodeURIComponent(q);
 const soloBook = q => 'https://www.goodreads.com/search?q=' + encodeURIComponent(q);
@@ -144,7 +202,13 @@ const SOLO_TOPICS = [
     ['🎸', 'Coco', 'A boy, a guitar, and the family waiting on the other side.', '$', '1h 45m', ['movie', 'animated', '2017']],
     ['✒️', 'Little Women', 'Four sisters, one house, a lifetime of growing up and apart.', '$', '2h 15m', ['movie', 'drama', '2019']],
   ] },
-  { first: true, words: ['movie', 'film', 'watch', 'netflix', 'show'], ideas: [
+  { first: true, words: ['tv', 'series', 'binge', 'sitcom', 'show'], ideas: [
+    ['☕', 'Friends', 'Six friends, one orange couch, and a coffee shop with suspiciously available seating.', '$', '22 min/ep', ['tv', 'sitcom', '1994']],
+    ['📎', 'The Office', 'A paper company, a terrible boss, and a stapler in Jell-O.', '$', '22 min/ep', ['tv', 'sitcom', '2005']],
+    ['🍂', 'Gilmore Girls', 'Fast talk, endless coffee, and the coziest small town on TV.', '$', '44 min/ep', ['tv', 'comfort', '2000']],
+    ['🌀', 'Avatar: The Last Airbender', 'Four nations, one kid with an arrow tattoo. Honestly one of the best shows ever made.', '$', '23 min/ep', ['tv', 'animated', '2005']],
+  ] },
+  { first: true, words: ['movie', 'film', 'watch', 'netflix'], ideas: [
     ['🐻', 'Paddington 2', 'A bear goes to prison and somehow makes it the kindest place on earth.', '$', '1h 44m', ['movie', 'comfort', '2017']],
     ['🗡️', 'The Princess Bride', 'Fencing. Giants. True love. Miracles. As you wish.', '$', '1h 38m', ['movie', 'classic', '1987']],
     ['🔪', 'Knives Out', 'A dead novelist, a greedy family, and a detective with a drawl.', '$', '2h 10m', ['movie', 'mystery', '2019']],
@@ -236,7 +300,7 @@ const SOLO_FILTERS = {
 const soloFilter = (ideas, { budget, time }) => ideas.filter(i =>
   (!budget || soloCost(i.cost) <= soloCost(budget)) &&
   (!time || time === 'all night' || soloMinutes(i.duration) <= (time === 'quick' ? 30 : 150)));
-const SOLO_ACTIVITIES = [['🎮', 'games'], ['🎬', 'movies'], ['🎵', 'songs'], ['💃', 'dancing'], ['🍳', 'cooking'], ['📍', 'going out'], ['📚', 'books']];
+const SOLO_ACTIVITIES = [['🎮', 'games'], ['🎬', 'movies & tv'], ['🎵', 'songs'], ['💃', 'dancing'], ['🍳', 'cooking'], ['📍', 'going out'], ['📚', 'books']];
 const SOLO_MOODS = [['😄', 'happy'], ['😢', 'sad'], ['😴', 'tired'], ['🥳', 'social'], ['⚡', 'wired'], ['💸', 'broke'],
   ['🧭', 'adventurous'], ['💕', 'romantic'], ['🛋️', 'cozy'], ['😤', 'stressed']];
 
@@ -282,6 +346,9 @@ soloStyle.textContent = `
   .solo-poster { height: 240px; display: grid; place-items: center; font-size: 104px; position: relative; }
   .solo-poster::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 50%, #14152c); }
   .solo-poster span { filter: drop-shadow(0 12px 24px #0007); z-index: 1; }
+  .solo-poster.art { height: 280px; display: block; }
+  .solo-poster.art svg { width: 100%; height: 100%; display: block; }
+  .solo-poster.art::after { background: linear-gradient(transparent 70%, #14152c); }
   .solo-cbody { padding: 0 28px 26px; position: relative; }
   .solo-kicker { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--mute); margin-bottom: 10px; }
   .solo-ctitle { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: 36px; line-height: 1.05; margin: 0 0 12px; font-weight: 600; letter-spacing: -.01em; }
@@ -416,14 +483,15 @@ registerFeature({
     // Card wheel: one big card in front, neighbours angled behind. Swipe, drag, arrows, dots or ← → keys; loops around.
     let go = null;
     const showWheel = ideas => {
-      const isMovie = i => (i.tags || []).some(t => /movie|film/i.test(t));
+      const isMovie = i => (i.tags || []).some(t => /^(movie|film|tv)$/i.test(t));
       out.innerHTML = `<div class="solo-wheel">${ideas.map(i => {
         const title = String(i.title || '').replace(/^watch\s+/i, '').replace(/^"(.*)"$/, '$1');
         const hue = [...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 17);
         const watch = /^https:\/\//.test(i.link || '') ? `<a class="solo-watch" target="_blank" rel="noopener" href="${ui.esc(i.link)}">${ui.esc(i.linkLabel || '🎮 Play now')}</a>`
           : isMovie(i) ? `<a class="solo-watch" target="_blank" rel="noopener" href="https://www.justwatch.com/us/search?q=${encodeURIComponent(title)}">▶ Where to watch</a>` : '';
         return `<article class="solo-card">
-          <div class="solo-poster" style="background: radial-gradient(circle at 30% 20%, hsl(${hue} 80% 62%), hsl(${(hue + 50) % 360} 60% 30%) 60%, #14152c)"><span>${ui.esc(i.emoji || '✨')}</span></div>
+          ${SOLO_POSTERS[title] ? `<div class="solo-poster art">${SOLO_POSTERS[title]}</div>`
+            : `<div class="solo-poster" style="background: radial-gradient(circle at 30% 20%, hsl(${hue} 80% 62%), hsl(${(hue + 50) % 360} 60% 30%) 60%, #14152c)"><span>${ui.esc(i.emoji || '✨')}</span></div>`}
           <div class="solo-cbody"><div class="solo-kicker">${ui.esc((i.tags || []).join(' · '))}</div>
             <h3 class="solo-ctitle">${ui.esc(title)}</h3><p class="solo-cdesc">${ui.esc(i.description || '')}</p>
             <div class="solo-meta">${ui.esc([i.duration, i.cost].filter(Boolean).join('  ·  '))}</div>
