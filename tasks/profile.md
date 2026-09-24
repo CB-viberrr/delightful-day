@@ -18,63 +18,52 @@ A new user can set up a profile in under 30 seconds, and Spark's ideas visibly c
 
 ## Boston notebook integration
 
-The six-step Boston notebook now lives in `public/features/profile.js`, using the existing plain JavaScript feature registry. It appears in **My profile** at `#/profile`; shared navigation, authentication, styling files, and the other teams' feature files are unchanged.
+The six-step Boston notebook lives in `public/features/profile.js`, using the existing plain JavaScript feature registry at `#/profile`. After setup, users get the integrator's one-page profile editor with automatic saving, **Retake the quiz**, and **Plan tonight in Spark**. The feature follows the shared app's current dark theme. No new dependency, endpoint, or database is needed.
 
-### Shared profile and existing account save
+### Shared profile and account save
 
-The versioned definition and stable option dictionaries are in `BostonProfile` / `OPTIONS` in the feature file. Completion merges the validated profile into **`app.profile.bostonNotebook`** and saves through the existing **`PUT /api/profile`** contract used by `app.saveProfile(...)`. The adapter calls the shared `api()` helper with the same body and guards the response against an account change during the request. Existing fields such as mood, energy, budget, and other teams' extra fields are preserved. No new account, database, dependency, or endpoint is required.
+`app.profile.bostonNotebook` keeps the versioned answers and stable IDs. The integrator's `aboutMe()` adapter also writes readable top-level profile fields for existing idea consumers: `name`, `neighborhood`, `interests`, `company`, `groupSize`, `vibes`, `budget`, `travel`, and `city: 'Boston'`. Profile-owned fields are replaced so skipped answers do not linger; unrelated fields remain intact. Budget IDs map to the existing categories (`free`, `$`, `$$`, `$$$`); the original numeric-range choice remains in the notebook. These categories are not a guarantee about actual venue prices.
 
-A current-question draft stays device-local. Failed account saves retain the current visit's notebook and expose a retry action. Reset clears this namespace and saves its deletion without removing other profile fields. This feature serializes its account writes; leaving the tab during a save does not let a late callback replace another team's screen.
+Completion and editor changes use the shared `api()` helper with the existing `PUT /api/profile` body `{profile}`. Writes are serialized. Account and view guards prevent late responses from replacing another user's state or updating a screen the user has left. A pending editor change flushes when leaving for Spark; an account switch never flushes another user's draft into the new account.
 
-`app.suggest(...)` already sends the full shared profile, so Spark, group, and network requests can receive `bostonNotebook`. **The built-in fallback ideas do not use these preferences.** Passing the data is verified; actual ranking, cost filtering, and tonight availability are the destination/idea-engine owner's work. The new notebook is the explicit source for these six preferences; legacy fields are preserved for compatibility and may describe older choices.
+Drafts use `tonight:boston-notebook:v1:<username>` with a session fallback when browser storage fails. The editor records unsynced changes immediately; failed saves expose **Try again**. Unsynced edits and unfinished quiz retakes take priority over older account data. The optional draft-record `accountPending` flag describes synchronization, not an answer in the profile schema.
 
-### Landing and map owners
+`app.suggest(...)` sends the shared profile, so Spark, group, and network requests can receive the notebook and readable answers. Verify actual ranking separately: Spark's local fallback matcher and its session-specific filters are owned by Spark, while the server fallback does not rank using notebook answers. No idea-generation request runs automatically on profile completion.
 
-The existing application loads `core.js` before this feature. The standalone, route-free entry point is:
+### Integration API
+
+The existing application loads `core.js` before this feature. A landing owner can call:
 
 ```js
 const unmount = BostonOnboarding.mount(container, {
-  // Omit this on normal entry to resume a saved draft.
+  // Omit on normal entry to resume a saved draft.
   initialProfile: existingBostonProfile, // optional; explicit edit handoff
   onComplete(profile) {
     const payload = BostonOnboarding.toDestination(profile);
-    // { profile, primaryContext: 'tonight', secondaryContext: 'coming_week' }
-    // Your shell owns persistence and navigation when calling mount directly.
+    // Current integrator contract: { profile, purpose: 'about_me' }
+    // A caller mounting directly owns account saving and navigation.
   },
 });
 ```
 
-For the registered My profile tab, the destination owner can connect:
-
-```js
-app.openBostonRecommendations = ({profile, primaryContext, secondaryContext}) => {
-  // Open your real Boston destination using these inputs.
-};
-```
-
-The tab also dispatches `boston:onboarding-complete` with the same payload. Avoid navigating from both the event listener and the adapter. When no map adapter is installed, completion shows an explicit Boston map placeholder plus **Open Spark ideas**, linking to the existing `#/solo` feature. It never calls the idea engine automatically.
+The registered feature dispatches `boston:onboarding-complete` with that payload. If `app.openBostonRecommendations(payload)` exists, it delegates navigation there; otherwise it opens the saved profile editor. Avoid routing from both an event listener and the adapter. Use the returned cleanup callback when leaving a manually mounted component. A Boston map and live place-ranking destination are not implemented by this feature.
 
 ### Meaning of stored answers
 
 - `schemaVersion: 1`; optional `name`; `completionState` is `in_progress` or `complete`.
-- `neighborhoodId` is nullable. `neighborhoodAnswer` distinguishes `selected`, `not_sure`, and `unanswered`.
-- `interests` contains `{mode, ids}`; modes are `selected`, `open_to_anything`, or `unanswered`.
-- `comfort` uses the same structure with `no_strong_preference` as its explicit open mode.
+- `neighborhoodId` is nullable; `neighborhoodAnswer` distinguishes `selected`, `not_sure`, and `unanswered`.
+- `interests` contains `{mode, ids}` with `selected`, `open_to_anything`, or `unanswered`.
+- `comfort` has the same structure, using `no_strong_preference` for its explicit open mode.
 - `company`, `budget`, and `travelRange` are nullable stable IDs; `transportIds` is an array.
-- `skippedQuestionIds` records explicit skips. Skip clears that question, and answering it removes the skipped marker.
-- `free` is an explicit budget constraint; an unknown price must never be interpreted as free.
-- Neighborhood IDs are provisional: `back_bay`, `beacon_hill`, `south_end`, `north_end`, `fenway`, `cambridge`, `somerville`. Agree on mapping with the map owner.
+- `skippedQuestionIds` records explicit skips; Skip clears that question and answering removes the flag.
+- `free` is an explicit budget constraint; an unknown price is not free.
+- Neighborhood IDs are provisional: `back_bay`, `beacon_hill`, `south_end`, `north_end`, `fenway`, `cambridge`, `somerville`. Coordinate map IDs with that owner.
 - Travel range is a preference, not a routing estimate. No demographics or personality traits are inferred.
 
-The static preview uses a warm background because the weather/time landing state is not present in this repository. The feature does not calculate a competing time theme. Notebook icons are provisional, bundled Lucide SVGs with licenses embedded in the feature.
+Notebook icons are bundled Lucide SVGs with licenses embedded in the feature. The feature does not compute a competing landing-page weather/time theme.
 
+### Team verification
 
-### Integration verification and shared-shell follow-up
+Integration checks load the shared HTML, scripts, styles, and production browser security policy, with account and suggestion APIs mocked. They cover setup, account saving, profile data in Spark's request after refresh, failure/retry, reset, and pending-save navigation/account changes. Editor checks cover automatic saving, leaving the tab, retaking the quiz, and recovering an unsynced draft. These checks establish integration behavior, not authenticated production database behavior or recommendation quality.
 
-The complete shared shell was tested with its real HTML, styles, core, and all feature files, using mocked account and suggestion endpoints. The checks cover account save and reload, direct Spark entry and request payload, preserved legacy preferences, retry after failure, and leaving/resetting during an in-flight save. There are no automatic suggestion requests on completion. Production asset delivery is checked separately; this does not establish live recommendation quality.
-
-Post-sync verification includes Charles’s Settings/security update and Kathryn’s Spark update, with the current production security headers applied. All six tabs register; notebook completion, account save, Spark navigation, refresh, and the suggestion payload pass. External services are mocked or blocked in these checks.
-
-Integrator/design follow-up: the shared navigation overflows narrow screens after Settings is added (390-pixel viewport, 515-pixel document). The notebook itself fits its 342-pixel content width. This feature leaves the shared header and styles to their owners.
-
-Integrator/Spark follow-up: the current security policy allows connections only to this site, so Spark’s new direct Open-Meteo requests are blocked and its weather fallback appears. Coordinate a permitted weather integration without weakening the shared security policy. This does not prevent notebook saving or the suggestion request.
+Shared navigation on small screens is owned by the integrator/design team. Keep future browser requests compatible with the team's current security policy; do not weaken it to connect a feature. Shared shell, Spark, and security changes remain in their owners' files.

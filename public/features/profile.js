@@ -799,24 +799,34 @@ registerFeature({
           input.closest('label').classList.toggle('profile-selected', input.checked);
         });
       }
-      let timer, saving = 0;
+      const editorOwner = app.user;
+      const draftKey = `tonight:boston-notebook:v1:${editorOwner || 'guest'}`;
+      let timer = null, saving = 0, active = true;
       function status(text, state) {
+        if (!active || disposed || app.user !== editorOwner) return;
         $('[data-status]').textContent = text;
         $('[data-dot]').className = 'profile-save-dot' + (state ? ' profile-save-' + state : '');
         $('[data-retry]').hidden = state !== 'error';
       }
+      function persistEditor(snapshot, accountPending = true) {
+        const record = {profile: snapshot, screen: 'summary', accountPending};
+        sessionDrafts.set(draftKey, record);
+        try { localStorage.setItem(draftKey, JSON.stringify(record)); } catch {}
+        return record;
+      }
       async function saveNow() {
-        clearTimeout(timer);
+        clearTimeout(timer); timer = null;
+        if (app.user !== editorOwner) return;
         const mine = ++saving, snapshot = JSON.parse(JSON.stringify(profile));
         status('Saving…', 'busy');
         try {
-          try { localStorage.setItem(`tonight:boston-notebook:v1:${app.user || 'guest'}`, JSON.stringify({profile: snapshot, screen: 'summary'})); } catch {}
-          sessionDrafts.delete(`tonight:boston-notebook:v1:${app.user || 'guest'}`);
+          const record = persistEditor(snapshot);
           await saveTeamNotebook(snapshot);
+          if (sessionDrafts.get(draftKey) === record) persistEditor(snapshot, false);
           if (!disposed && mine === saving) status('All changes saved');
         } catch { if (!disposed && mine === saving) status('Couldn’t save to your account.', 'error'); }
       }
-      const queueSave = () => { status('Saving…', 'busy'); clearTimeout(timer); timer = setTimeout(saveNow, 450); };
+      const queueSave = () => { persistEditor(JSON.parse(JSON.stringify(profile))); status('Saving…', 'busy'); clearTimeout(timer); timer = setTimeout(saveNow, 450); };
       function change(group, id, checked) {
         if (group === 'neighborhood') { profile.neighborhoodAnswer = id === 'not_sure' ? 'not_sure' : 'selected'; profile.neighborhoodId = id === 'not_sure' ? null : id; }
         else if (group === 'interests' || group === 'comfort') {
@@ -841,10 +851,11 @@ registerFeature({
       view.querySelectorAll('[data-choice]').forEach(input => input.onchange = () => change(input.dataset.group, input.value, input.checked));
       nameInput.oninput = () => { const v = nameInput.value.trim(); if (v) profile.name = v; else delete profile.name; queueSave(); };
       $('[data-retry]').onclick = saveNow;
-      $('[data-retake]').onclick = () => { clearTimeout(timer); edit(JSON.parse(JSON.stringify(profile))); };
+      $('[data-retake]').onclick = () => edit(JSON.parse(JSON.stringify(profile)));
       sync();
+      if (!savedToAccount) persistEditor(JSON.parse(JSON.stringify(profile)));
       status(savedToAccount ? (justSaved ? 'Saved to your account' : 'All changes saved') : 'Couldn’t save to your account.', savedToAccount ? '' : 'error');
-      cleanup = () => { if (timer) { clearTimeout(timer); saveNow(); } };
+      cleanup = () => { active = false; if (timer !== null) saveNow(); };
       view.querySelector('h1').focus();
     }
     async function onComplete(profile) {
@@ -864,15 +875,18 @@ registerFeature({
     }
     // A local draft takes precedence on normal feature re-entry. Explicit Edit
     // uses initialProfile; a first server-provided notebook is only a fallback.
-    let hasLocalDraft = sessionDrafts.has(`tonight:boston-notebook:v1:${app.user || 'guest'}`);
+    const draftKey = `tonight:boston-notebook:v1:${app.user || 'guest'}`;
+    let localDraft = sessionDrafts.get(draftKey);
     try {
-      const record = JSON.parse(localStorage.getItem(`tonight:boston-notebook:v1:${app.user || 'guest'}`) || 'null');
-      hasLocalDraft ||= !!validateProfile(record?.profile) && (QUESTIONS.includes(record?.screen) || record?.screen === 'summary');
+      localDraft ||= JSON.parse(localStorage.getItem(draftKey) || 'null');
     } catch {}
-    // A finished profile opens straight into the one-page editor.
+    const draftNotebook = (QUESTIONS.includes(localDraft?.screen) || localDraft?.screen === 'summary') && validateProfile(localDraft?.profile);
+    // Keep an unsynced edit or unfinished retake ahead of an older account copy.
     const accountNotebook = validateProfile(app.profile?.bostonNotebook);
-    if (accountNotebook?.completionState === 'complete') showEditor(accountNotebook);
-    else edit(hasLocalDraft ? undefined : accountNotebook || undefined);
+    if (draftNotebook?.completionState === 'complete') showEditor(draftNotebook, {savedToAccount: localDraft.accountPending !== true && JSON.stringify(draftNotebook) === JSON.stringify(accountNotebook)});
+    else if (draftNotebook) edit();
+    else if (accountNotebook?.completionState === 'complete') showEditor(accountNotebook);
+    else edit(accountNotebook || undefined);
     return () => {disposed=true;revision++;if(cleanup)cleanup();};
   }
 });
