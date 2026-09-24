@@ -49,7 +49,66 @@ const SOLO_FORECAST = {"Boston":{"start":1790208000,"t":[54,53,52,52,51,51,51,51
 const soloPick = list => list[Math.floor(Math.random() * list.length)];
 // Built-in mood matcher, used when the AI isn't connected. A topic matches if the text has any `words`
 // (and, if given, any `also` words too). Idea rows: [emoji, title, description, cost, duration, tags].
+const soloYT = q => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
+const soloGoogle = q => 'https://www.google.com/search?q=' + encodeURIComponent(q);
+const soloMaps = q => 'https://www.google.com/maps/search/' + encodeURIComponent(q);
+const soloBook = q => 'https://www.goodreads.com/search?q=' + encodeURIComponent(q);
 const SOLO_TOPICS = [
+  { first: true, words: ['song', 'music', 'playlist', 'sing'], ideas: [
+    ['🕺', 'Mr. Brightside', 'The Killers. Every word, full volume, no exceptions.', 'free', '4 min', ['song', 'anthem', '2003'], soloYT('Mr. Brightside The Killers'), '🎵 Listen'],
+    ['👑', 'Dancing Queen', 'ABBA. Instantly seventeen, whatever your age.', 'free', '4 min', ['song', 'disco', '1976'], soloYT('Dancing Queen ABBA'), '🎵 Listen'],
+    ['🌈', 'Hey Ya!', 'OutKast. Impossible to sit still through.', 'free', '4 min', ['song', 'feel-good', '2003'], soloYT('Hey Ya OutKast'), '🎵 Listen'],
+    ['🇺🇸', 'Party in the U.S.A.', 'Miley Cyrus. Hands up, you know the rest.', 'free', '3 min', ['song', 'pop', '2009'], soloYT('Party in the USA Miley Cyrus'), '🎵 Listen'],
+    ['🍂', 'September', 'Earth, Wind & Fire. The most joyful three and a half minutes ever recorded.', 'free', '4 min', ['song', 'funk', '1978'], soloYT('September Earth Wind and Fire'), '🎵 Listen'],
+    ['⚡', 'Don\'t Stop Me Now', 'Queen. Pure, uncut joy with a piano.', 'free', '4 min', ['song', 'rock', '1978'], soloYT('Don\'t Stop Me Now Queen'), '🎵 Listen'],
+    ['☂️', 'Umbrella', 'Rihanna. The chorus that owned an entire summer.', 'free', '4 min', ['song', 'pop', '2007'], soloYT('Umbrella Rihanna'), '🎵 Listen'],
+    ['🎉', 'I Gotta Feeling', 'Black Eyed Peas. Basically the official song of going out.', 'free', '5 min', ['song', 'party', '2009'], soloYT('I Gotta Feeling Black Eyed Peas'), '🎵 Listen'],
+    ['💌', 'Love Story', 'Taylor Swift. Romeo, Juliet, and a legendary key change.', 'free', '4 min', ['song', 'pop', '2008'], soloYT('Love Story Taylor Swift'), '🎵 Listen'],
+    ['🔥', 'Crazy in Love', 'Beyoncé. Those horns. That\'s it, that\'s the review.', 'free', '4 min', ['song', 'r&b', '2003'], soloYT('Crazy in Love Beyonce'), '🎵 Listen'],
+    ['🕶️', 'Yeah!', 'Usher. The intro alone can start a party.', 'free', '4 min', ['song', 'r&b', '2004'], soloYT('Yeah Usher'), '🎵 Listen'],
+    ['🚗', 'Since U Been Gone', 'Kelly Clarkson. The ultimate windows-down singalong.', 'free', '4 min', ['song', 'pop', '2004'], soloYT('Since U Been Gone Kelly Clarkson'), '🎵 Listen'],
+  ] },
+  { first: true, words: ['danc', 'boogie', 'groove'], ideas: [
+    ['🔁', 'The Cha Cha Slide', 'You already know every step. Now do it in your living room.', 'free', '5 min', ['dance', 'classic', 'at home'], soloYT('Cha Cha Slide dance'), '💃 Dance along'],
+    ['🧟', 'Learn the "Thriller" dance', 'Michael Jackson\'s zombie choreography, one step at a time.', 'free', '45 min', ['dance', 'tutorial', 'at home'], soloYT('Thriller dance tutorial'), '💃 Dance along'],
+    ['🎮', 'Just Dance at home', 'Pull up a Just Dance video and follow the neon dancer.', 'free', '30 min', ['dance', 'workout', 'at home'], soloYT('Just Dance full song'), '💃 Dance along'],
+    ['📱', 'Learn a TikTok dance', 'Pick one trend and nail it before midnight.', 'free', '30 min', ['dance', 'tutorial', 'at home'], soloYT('easy TikTok dance tutorial'), '💃 Dance along'],
+    ['🏠', 'Kitchen dance party', 'Lights low, speaker up, socks on the tile floor.', 'free', '30 min', ['dance', 'party', 'at home'], soloYT('2000s dance party playlist'), '🎵 Get the playlist'],
+    ['💃', 'Drop-in salsa class', 'Beginner nights are everywhere, and you don\'t need a partner.', '$$', '1h', ['dance', 'class', 'out'], soloMaps('salsa dance class'), '📍 Find nearby'],
+    ['🎷', 'Swing dance social', 'Most start with a free lesson. Twirling guaranteed.', '$', '2h', ['dance', 'social', 'out'], soloMaps('swing dance social'), '📍 Find nearby'],
+    ['🤠', 'Line dancing night', 'Boots optional. Yeehaw mandatory.', '$', '2h', ['dance', 'country', 'out'], soloMaps('line dancing'), '📍 Find nearby'],
+    ['🎧', 'Silent disco', 'Headphones on, pick a channel, dance like nobody can hear.', '$$', '2h', ['dance', 'party', 'out'], soloMaps('silent disco'), '📍 Find nearby'],
+  ] },
+  { first: true, words: ['cook', 'bak', 'recipe', 'hungry', 'dinner', 'kitchen'], ideas: [
+    ['🍕', 'Homemade pizza', 'Stretch the dough, pile on toppings, argue about pineapple.', '$', '1.5h', ['cooking', 'at home'], soloGoogle('easy homemade pizza recipe'), '🍳 Get the recipe'],
+    ['🍜', 'Pad Thai', 'Better than takeout, and done in 30 minutes.', '$', '30 min', ['cooking', 'at home'], soloGoogle('easy pad thai recipe'), '🍳 Get the recipe'],
+    ['🍪', 'Brown butter cookies', 'Brown the butter first. Trust us.', '$', '45 min', ['baking', 'at home'], soloGoogle('brown butter chocolate chip cookies recipe'), '🍳 Get the recipe'],
+    ['🥢', 'Glow-up instant ramen', 'Soft egg, scallions, chili oil. College food, but grown up.', '$', '15 min', ['cooking', 'at home'], soloGoogle('upgraded instant ramen recipe'), '🍳 Get the recipe'],
+    ['🌮', 'Street tacos', 'Charred tortillas, quick-pickled onions, too much lime.', '$', '45 min', ['cooking', 'at home'], soloGoogle('street tacos recipe'), '🍳 Get the recipe'],
+    ['🥞', 'Breakfast for dinner', 'Pancakes at 9pm just hit different.', '$', '30 min', ['cooking', 'at home'], soloGoogle('fluffy pancakes recipe'), '🍳 Get the recipe'],
+    ['☕', '5-minute mug cake', 'Microwave, fork, done. Dessert emergency solved.', '$', '5 min', ['baking', 'at home'], soloGoogle('chocolate mug cake recipe'), '🍳 Get the recipe'],
+    ['🍣', 'Roll your own sushi', 'Wobbly rolls, maximum fun. A bamboo mat helps.', '$$', '1.5h', ['cooking', 'at home'], soloGoogle('homemade sushi rolls for beginners'), '🍳 Get the recipe'],
+  ] },
+  { first: true, words: ['going out', 'go out', 'out tonight', 'near me', 'nearby', 'outside'], ideas: [
+    ['⛳', 'Mini golf', 'Windmills, trash talk, and a hole-in-one you\'ll mention forever.', '$', '1h', ['going out', 'playful'], soloMaps('mini golf'), '📍 Find nearby'],
+    ['🌃', 'Rooftop drinks', 'Same city, better view. Go right before sunset.', '$$', '2h', ['going out', 'views'], soloMaps('rooftop bar'), '📍 Find nearby'],
+    ['🍳', 'Late-night diner run', 'Milkshakes and fries at 11pm. A timeless tradition.', '$', '1h', ['going out', 'food'], soloMaps('late night diner'), '📍 Find nearby'],
+    ['🎳', 'Bowling', 'Cheesy shoes, loud music, and gutter balls.', '$$', '2h', ['going out', 'playful'], soloMaps('bowling alley'), '📍 Find nearby'],
+    ['🎤', 'Karaoke', 'Pick the song you secretly know every word to.', '$', '2h', ['going out', 'music'], soloMaps('karaoke bar'), '📍 Find nearby'],
+    ['😂', 'Comedy show', 'Open-mic nights are cheap, and occasionally legendary.', '$', '2h', ['going out', 'funny'], soloMaps('comedy club'), '📍 Find nearby'],
+    ['🕹️', 'Arcade bar', 'Skee-ball and pinball. Winner picks the next spot.', '$', '2h', ['going out', 'games'], soloMaps('arcade bar'), '📍 Find nearby'],
+    ['🍦', 'Ice cream walk', 'Get a cone, pick a direction, just wander.', '$', '45 min', ['going out', 'sweet'], soloMaps('ice cream'), '📍 Find nearby'],
+  ] },
+  { first: true, words: ['book', 'reading', 'novel'], ideas: [
+    ['⚡', 'Harry Potter and the Sorcerer\'s Stone', 'The letter finally came. Reread it like it\'s the first time.', 'free', 'all night', ['book', 'fantasy', '1997'], soloBook('Harry Potter and the Sorcerer\'s Stone'), '📖 Look it up'],
+    ['🏹', 'The Hunger Games', 'A girl, a bow, and a deadly reality show.', 'free', 'all night', ['book', 'dystopia', '2008'], soloBook('The Hunger Games'), '📖 Look it up'],
+    ['🔱', 'Percy Jackson: The Lightning Thief', 'Your math teacher is a monster. Literally.', 'free', 'all night', ['book', 'adventure', '2005'], soloBook('The Lightning Thief'), '📖 Look it up'],
+    ['🕳️', 'Holes', 'A cursed family, a dry lake, and a lot of digging.', 'free', '3h', ['book', 'classic', '1998'], soloBook('Holes Louis Sachar'), '📖 Look it up'],
+    ['📓', 'Diary of a Wimpy Kid', 'It\'s a journal, not a diary. Still hilarious.', 'free', '1.5h', ['book', 'funny', '2007'], soloBook('Diary of a Wimpy Kid'), '📖 Look it up'],
+    ['💐', 'The Perks of Being a Wallflower', 'Letters from a kid who feels everything.', 'free', '4h', ['book', 'coming-of-age', '1999'], soloBook('The Perks of Being a Wallflower'), '📖 Look it up'],
+    ['🎩', 'A Series of Unfortunate Events', 'The narrator begs you not to read it. Read it.', 'free', '2h', ['book', 'mystery', '1999'], soloBook('The Bad Beginning'), '📖 Look it up'],
+    ['🍎', 'The Giver', 'A perfect world with no color. Or is it perfect?', 'free', '3h', ['book', 'classic', '1993'], soloBook('The Giver Lois Lowry'), '📖 Look it up'],
+  ] },
   { first: true, words: ['game', 'gaming', 'arcade', 'nostalg', 'coolmath', 'childhood', 'grew up', 'growing up', 'play online'], ideas: [
     ['🐍', 'Snake', 'Eat the apple. Don\'t eat yourself. Harder than it sounds.', 'free', '5 min', ['game', 'classic', '1997'], 'https://www.google.com/fbx?fbx=snake_arcade'],
     ['🔥', 'Fireboy and Watergirl', 'Two players, one keyboard, and a friendship tested by lava.', 'free', '30 min', ['game', '2-player', '2009'], 'https://www.coolmathgames.com/0-fireboy-and-water-girl-in-the-forest-temple'],
@@ -85,7 +144,7 @@ const SOLO_TOPICS = [
     ['🎸', 'Coco', 'A boy, a guitar, and the family waiting on the other side.', '$', '1h 45m', ['movie', 'animated', '2017']],
     ['✒️', 'Little Women', 'Four sisters, one house, a lifetime of growing up and apart.', '$', '2h 15m', ['movie', 'drama', '2019']],
   ] },
-  { words: ['movie', 'film', 'watch', 'netflix', 'show'], ideas: [
+  { first: true, words: ['movie', 'film', 'watch', 'netflix', 'show'], ideas: [
     ['🐻', 'Paddington 2', 'A bear goes to prison and somehow makes it the kindest place on earth.', '$', '1h 44m', ['movie', 'comfort', '2017']],
     ['🗡️', 'The Princess Bride', 'Fencing. Giants. True love. Miracles. As you wish.', '$', '1h 38m', ['movie', 'classic', '1987']],
     ['🔪', 'Knives Out', 'A dead novelist, a greedy family, and a detective with a drawl.', '$', '2h 10m', ['movie', 'mystery', '2019']],
@@ -156,13 +215,28 @@ const soloMatch = text => {
   const t = text.toLowerCase(), has = list => list.filter(w => t.includes(w)).length;
   const hits = SOLO_TOPICS.map(topic => ({ topic, score: has(topic.words) * (topic.also ? (has(topic.also) ? 3 : 0) : 1) }))
     .filter(x => x.score > 0).sort((a, b) => b.score - a.score);
-  // Specific asks (like "sad movie") go first; the other moods take turns so each one gets ideas in the mix.
-  const firstUp = x => x.topic.also || x.topic.first;
-  const exact = hits.filter(firstUp).flatMap(x => x.topic.ideas), lists = hits.filter(x => !firstUp(x)).map(x => x.topic.ideas);
-  const mixed = [...exact, ...Array.from({ length: Math.max(0, ...lists.map(l => l.length)) }, (_, r) => lists.map(l => l[r]).filter(Boolean)).flat()];
-  return mixed.filter((i, n, all) => all.findIndex(j => j[1] === i[1]) === n).slice(0, 24)
-    .map(([emoji, title, description, cost, duration, tags, link]) => ({ emoji, title, description, cost, duration, tags, vibe: tags[0], mode: 'solo', link }));
+  // Specific asks (like "sad movie") go first, then activities, then feelings. Within a tier, topics take turns.
+  const turns = lists => Array.from({ length: Math.max(0, ...lists.map(l => l.length)) }, (_, r) => lists.map(l => l[r]).filter(Boolean)).flat();
+  const mixed = [...hits.filter(x => x.topic.also).flatMap(x => x.topic.ideas),
+    ...turns(hits.filter(x => x.topic.first).map(x => x.topic.ideas)),
+    ...turns(hits.filter(x => !x.topic.also && !x.topic.first).map(x => x.topic.ideas))];
+  return soloIdeas(mixed);
 };
+const soloIdeas = rows => rows.filter((i, n, all) => all.findIndex(j => j[1] === i[1]) === n)
+  .map(([emoji, title, description, cost, duration, tags, link, linkLabel]) => ({ emoji, title, description, cost, duration, tags, vibe: tags[0], mode: 'solo', link, linkLabel }));
+// Budget / time filters. Durations like "1h 45m", "30 min", "all night" -> minutes.
+const soloCost = c => ({ free: 0, $: 1, $$: 2, $$$: 3 })[c] ?? 1;
+const soloMinutes = d => /all night|forever/i.test(d || '') ? 999
+  : ((+((d || '').match(/([\d.]+)\s*h/) || [])[1] || 0) * 60) + (+((d || '').match(/(\d+)\s*m/) || [])[1] || 0) || 60;
+const SOLO_FILTERS = {
+  who: { label: 'Who', icon: '👥', options: [['🙋', 'just me'], ['💕', 'date'], ['👯', 'friends'], ['👨‍👩‍👧', 'family']] },
+  budget: { label: 'Budget', icon: '💰', options: [['🆓', 'free'], ['💵', '$'], ['💵', '$$'], ['💎', '$$$']] },
+  time: { label: 'Time', icon: '⏰', options: [['⚡', 'quick'], ['🕐', 'couple hours'], ['🌙', 'all night']] },
+};
+const soloFilter = (ideas, { budget, time }) => ideas.filter(i =>
+  (!budget || soloCost(i.cost) <= soloCost(budget)) &&
+  (!time || time === 'all night' || soloMinutes(i.duration) <= (time === 'quick' ? 30 : 150)));
+const SOLO_ACTIVITIES = [['🎮', 'games'], ['🎬', 'movies'], ['🎵', 'songs'], ['💃', 'dancing'], ['🍳', 'cooking'], ['📍', 'going out'], ['📚', 'books']];
 const SOLO_MOODS = [['😄', 'happy'], ['😢', 'sad'], ['😴', 'tired'], ['🥳', 'social'], ['⚡', 'wired'], ['💸', 'broke'],
   ['🧭', 'adventurous'], ['💕', 'romantic'], ['🛋️', 'cozy'], ['😤', 'stressed']];
 
@@ -187,7 +261,18 @@ soloStyle.textContent = `
   .solo-mood input:focus { outline: none; border-color: var(--accent2); }
   .solo-mood .chip { font-size: 14px; padding: 6px 14px; }
   .solo-mood .chip:hover { border-color: var(--accent2); }
-  .solo-moodhint { color: var(--mute); font-size: 13px; margin-top: 4px; }
+  .solo-mood form { margin: 14px 0 0; }
+  .solo-dds { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .solo-dd { position: relative; }
+  .solo-ddbtn { font: inherit; font-size: 15px; background: #0f1024; color: var(--ink); border: 1px solid var(--line); border-radius: 999px;
+    padding: 9px 16px; cursor: pointer; transition: border-color .2s, background .2s; }
+  .solo-ddbtn:hover, .solo-dd.open .solo-ddbtn { border-color: var(--accent2); }
+  .solo-dd.picked .solo-ddbtn { background: linear-gradient(135deg, #ff8a5c33, #c86bfa33); border-color: var(--accent2); }
+  .solo-ddmenu { display: none; position: absolute; top: calc(100% + 8px); left: 0; z-index: 40; width: 280px; padding: 12px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 20px 50px #000a; }
+  .solo-dd.open .solo-ddmenu { display: block; animation: solo-pop .2s ease; }
+  .solo-ddnote { font-size: 12px; color: var(--mute); margin-bottom: 8px; }
+  .solo-clear { font: inherit; font-size: 13px; background: none; border: 0; color: var(--mute); cursor: pointer; text-decoration: underline; }
   .solo-for { color: var(--mute); margin: 18px 0 0; }
   .solo-wheel { position: relative; height: 600px; perspective: 1400px; overflow: hidden; touch-action: pan-y; user-select: none; margin-top: 6px; }
   .solo-card { position: absolute; left: 50%; top: 14px; width: 340px; background: #14152c; border: 1px solid var(--line); border-radius: 22px;
@@ -223,11 +308,17 @@ registerFeature({
   render(view) {
     view.innerHTML = `<section class="page"><h1>What could I do tonight?</h1>
       <p class="sub">Ideas tailored to your profile (${Object.keys(app.profile).length ? 'loaded' : 'fill in Profile for better ideas'}).</p>
-      <div class="solo-mood"><h2>What are you feeling?</h2>
-        <form id="moodForm"><input id="mood" autocomplete="off" placeholder="Type anything: happy, tired, want to dance, need a hug…">
+      <div class="solo-mood"><h2>What's the vibe tonight?</h2>
+        <div class="solo-dds">${[
+          ['feeling', '😊', 'Feeling', SOLO_MOODS, true], ['activity', '🎯', 'Activity', SOLO_ACTIVITIES, true],
+          ...Object.entries(SOLO_FILTERS).map(([k, f]) => [k, f.icon, f.label, f.options, false]),
+        ].map(([key, icon, label, opts, multi]) => `<div class="solo-dd" data-key="${key}" data-label="${icon} ${label}" ${multi ? 'data-multi' : ''}>
+          <button class="solo-ddbtn" type="button">${icon} ${label} ▾</button>
+          <div class="solo-ddmenu">${multi ? '<div class="solo-ddnote">Pick as many as you like</div>' : ''}
+            ${opts.map(([e, v]) => `<button class="chip" type="button" data-v="${v}">${e} ${v}</button>`).join('')}</div></div>`).join('')}
+          <button class="solo-clear" type="button" id="clear">Clear all</button></div>
+        <form id="moodForm"><input id="mood" autocomplete="off" placeholder="Or type anything: want to play online games, need a hug…">
           <button class="btn" type="submit" id="find">Find ideas ✨</button></form>
-        <div id="moodChips">${SOLO_MOODS.map(([e, m]) => `<button class="chip" type="button" data-mood="${m}">${e} ${m}</button>`).join('')}</div>
-        <div class="solo-moodhint">Pick as many as you like, then hit Find ideas.</div>
       </div>
       <div class="row"><button class="btn ghost" id="go">Just give me ideas</button><button class="btn ghost" id="wild">🎲 Surprise me</button></div>
       <p class="solo-for" id="for"></p>
@@ -279,21 +370,44 @@ registerFeature({
     showJoke(); showFact(); showWord(); showWeather();
 
     const moodBox = view.querySelector('#mood'), forLine = view.querySelector('#for');
-    const chips = [...view.querySelectorAll('#moodChips .chip')];
-    // Everything they're feeling: typed text plus every mood button that's switched on.
-    const moods = () => [moodBox.value.trim(), ...chips.filter(c => c.classList.contains('on')).map(c => c.dataset.mood)].filter(Boolean).join(', ');
-    const run = async (wild, mood = moods()) => {
-      forLine.textContent = mood ? `Ideas for when you're feeling ${mood}:` : '';
+    // Dropdowns: Feeling + Activity allow several picks; Who / Budget / Time allow one.
+    const dds = [...view.querySelectorAll('.solo-dd')];
+    const pick = key => [...view.querySelectorAll(`.solo-dd[data-key="${key}"] .chip.on`)].map(c => c.dataset.v);
+    const label = dd => {
+      const on = [...dd.querySelectorAll('.chip.on')].map(c => c.dataset.v);
+      dd.querySelector('.solo-ddbtn').textContent = `${dd.dataset.label}${on.length ? ': ' + on.join(', ') : ''} ▾`;
+      dd.classList.toggle('picked', on.length > 0);
+    };
+    dds.forEach(dd => {
+      dd.querySelector('.solo-ddbtn').onclick = () => { const was = dd.classList.contains('open'); dds.forEach(d => d.classList.remove('open')); dd.classList.toggle('open', !was); };
+      dd.querySelectorAll('.chip').forEach(c => c.onclick = () => {
+        if (!dd.hasAttribute('data-multi')) { dd.querySelectorAll('.chip').forEach(x => x !== c && x.classList.remove('on')); dd.classList.remove('open'); }
+        c.classList.toggle('on'); label(dd);
+      });
+    });
+    const closeMenus = e => { if (!e.target.closest('.solo-dd')) dds.forEach(d => d.classList.remove('open')); };
+    document.addEventListener('click', closeMenus);
+    view.querySelector('#clear').onclick = () => { view.querySelectorAll('.solo-dd .chip.on').forEach(c => c.classList.remove('on')); dds.forEach(label); moodBox.value = ''; };
+
+    const run = async wild => {
+      const text = moodBox.value.trim(), feeling = pick('feeling'), activity = pick('activity');
+      const [who] = pick('who'), [budget] = pick('budget'), [time] = pick('time');
+      const mood = [text, ...feeling].filter(Boolean).join(', '), query = [text, ...feeling, ...activity, who].filter(Boolean).join(', ');
+      const parts = [mood, activity.join(' + '), who && `with ${who === 'just me' ? 'yourself' : who}`, budget, time].filter(Boolean);
+      forLine.textContent = parts.length ? `Ideas for: ${parts.join('  ·  ')}` : '';
       out.innerHTML = ui.loading();
       try {
         const context = wild ? { wildcard: 'Suggest something unexpected and out of their usual comfort zone' } : {};
-        if (mood) context.mood = mood;
+        Object.assign(context, Object.fromEntries(Object.entries({ mood, activity: activity.join(', '), who, budget, time }).filter(([, v]) => v)));
         let { ideas, source } = await app.suggest('solo', context, wild ? 3 : 5);
-        // No AI connected: use our own mood matcher so typed moods still get matching ideas.
-        // No AI connected (or they asked for games, which need play links): use our own matcher.
-        const matched = mood && !wild ? soloMatch(mood) : [];
+        // No AI connected (or the picks need play/listen/recipe links): use our own matcher, then apply budget/time.
+        let matched = !wild && query ? soloMatch(query) : [];
+        if (!wild && !matched.length && (budget || time)) matched = soloIdeas(SOLO_TOPICS.flatMap(t => t.ideas).sort(() => Math.random() - .5));
+        const fits = soloFilter(matched, { budget, time });
+        if (matched.length && !fits.length) ui.toast('Nothing fit your budget/time exactly, so here are the closest ideas');
+        matched = (fits.length ? fits : matched).slice(0, 24);
         if (matched.length && (source === 'fallback' || matched[0].link)) ideas = matched;
-        else if (source === 'fallback' && mood) ui.toast("Hmm, I didn't catch that mood. Here are some general ideas!");
+        else if (source === 'fallback' && query) ui.toast("Hmm, I didn't catch that. Here are some general ideas!");
         out.innerHTML = '';
         forLine.scrollIntoView({ behavior: 'smooth', block: 'start' });
         showWheel(ideas);
@@ -306,7 +420,7 @@ registerFeature({
       out.innerHTML = `<div class="solo-wheel">${ideas.map(i => {
         const title = String(i.title || '').replace(/^watch\s+/i, '').replace(/^"(.*)"$/, '$1');
         const hue = [...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 17);
-        const watch = /^https:\/\//.test(i.link || '') ? `<a class="solo-watch" target="_blank" rel="noopener" href="${ui.esc(i.link)}">🎮 Play now</a>`
+        const watch = /^https:\/\//.test(i.link || '') ? `<a class="solo-watch" target="_blank" rel="noopener" href="${ui.esc(i.link)}">${ui.esc(i.linkLabel || '🎮 Play now')}</a>`
           : isMovie(i) ? `<a class="solo-watch" target="_blank" rel="noopener" href="https://www.justwatch.com/us/search?q=${encodeURIComponent(title)}">▶ Where to watch</a>` : '';
         return `<article class="solo-card">
           <div class="solo-poster" style="background: radial-gradient(circle at 30% 20%, hsl(${hue} 80% 62%), hsl(${(hue + 50) % 360} 60% 30%) 60%, #14152c)"><span>${ui.esc(i.emoji || '✨')}</span></div>
@@ -363,14 +477,8 @@ registerFeature({
     const key = 'saved:' + app.user;
     const save = i => { try { const s = JSON.parse(localStorage[key] || '[]'); s.push(i); localStorage[key] = JSON.stringify(s); ui.toast('Saved!'); } catch {} };
     view.querySelector('#moodForm').onsubmit = e => { e.preventDefault(); run(false); };
-    const findBtn = view.querySelector('#find');
-    chips.forEach(c => c.onclick = () => {
-      c.classList.toggle('on');
-      const n = chips.filter(x => x.classList.contains('on')).length;
-      findBtn.textContent = n > 1 ? `Find ideas for ${n} moods ✨` : 'Find ideas ✨';
-    });
     view.querySelector('#go').onclick = () => run(false);
     view.querySelector('#wild').onclick = () => run(true);
-    return () => document.removeEventListener('keydown', keys);
+    return () => { document.removeEventListener('keydown', keys); document.removeEventListener('click', closeMenus); };
   },
 });
